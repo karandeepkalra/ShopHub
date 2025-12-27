@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Search, Heart, ShoppingCart, MapPin, User, GitCompare } from "lucide-react";
+import { Search, Heart, ShoppingCart, MapPin, User, GitCompare, Settings, LogOut } from "lucide-react";
 import axios from "axios";
+import { Navbar } from "./Navbar";
 import CustomDropdown from "./CustomDropdown";
-
+import ClickAwayListener from "@mui/material/ClickAwayListener";
 const Header = () => {
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [selectedState, setSelectedState] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [countryList, setCountryList] = useState([]);
+  const [showAccountMenu, setShowAccountMenu] = useState(false);
 
   const categories = [
     "All Categories",
@@ -43,10 +45,11 @@ const Header = () => {
   };
 
   return (
+    <>
     <div className="bg-gradient-to-r from-green-50 to-blue-50 border-b border-gray-200 shadow-sm">
       <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-5 ">
         <div className="flex items-center w-full gap-12">
-          
+
           {/* Column 1: Logo - LEFT */}
           <div className="flex-shrink-0 w-48">
             <div className="h-12 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg flex items-center justify-center">
@@ -106,16 +109,64 @@ const Header = () => {
                 <GitCompare className="w-6 h-6 text-gray-700 hover:text-green-600 transition-colors" />
               </button>
 
-              <button className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-colors shadow-sm hover:shadow-md">
-                <User className="w-4 h-4" />
-                <span className="font-medium">Sign In</span>
-              </button>
+              <div className="relative">
+  <button
+    onClick={() => setShowAccountMenu(prev => !prev)}
+    className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg"
+  >
+    <User className="w-4 h-4" />
+    <span className="font-medium">Account</span>
+  </button>
+
+  {showAccountMenu && (
+    <ClickAwayListener onClickAway={() => setShowAccountMenu(false)}>
+                  <div className="absolute right-0 mt-3 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    <ul className="py-2 text-sm text-gray-700">
+                      <li className="px-4 py-2 hover:text-green-600 flex items-center gap-3 cursor-pointer">
+                        <User className="w-4 h-4 text-gray-600" />
+                        My Account
+                      </li>
+
+                      <li className="px-4 py-2 hover:text-green-600 flex items-center gap-3 cursor-pointer">
+                        <MapPin className="w-4 h-4 text-gray-600" />
+                        Order Tracking
+                      </li>
+
+                      <li className="px-4 py-2 hover:text-green-600 flex items-center gap-3 cursor-pointer">
+                        <ShoppingCart className="w-4 h-4 text-gray-600" />
+                        My Voucher
+                      </li>
+
+                      <li className="px-4 py-2 hover:text-green-600 flex items-center gap-3 cursor-pointer">
+                        <Heart className="w-4 h-4 text-gray-600" />
+                        My Wishlist
+                      </li>
+
+                      <li className="px-4 py-2 hover:text-green-600 flex items-center gap-3 cursor-pointer">
+                        <Settings className="w-4 h-4 text-gray-600" />
+                        Settings
+                      </li>
+
+
+                      <li className="px-4 py-2 hover:text-green-600 flex items-center gap-3 cursor-pointer">
+                        <LogOut className="w-4 h-4" />
+                        Sign Out
+                      </li>
+                    </ul>
+
+                  </div>
+                   </ClickAwayListener>
+                )}
+              </div>
+
             </div>
           </div>
 
         </div>
       </div>
     </div>
+    <Navbar/>
+    </> 
   );
 };
 
