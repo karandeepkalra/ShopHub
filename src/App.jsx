@@ -3,9 +3,16 @@ import { useEffect } from "react";
 import "./index.css";
 import Header from "./components/Header.jsx";
 import { Slider } from "./components/Slider.jsx";
+import { CategorySlider } from "./components/CategorySlider.jsx";
+import ProductCatalog from "./components/ProductCatalog.jsx";
+import FeaturedProducts from "./components/FeaturedProducts.jsx";
+import CategoryPage from "./Pages/CategoryPage.jsx";
 const HomePage = () => (
   <>
   <Slider/>
+  <CategorySlider/>
+  <ProductCatalog/>
+  <FeaturedProducts/>
   </>
 );
 
@@ -65,14 +72,14 @@ const DealsPage = () => (
   </div>
 );
 
-const CategoryPage = ({ category }) => (
-  <div className="container mx-auto px-4 py-8">
-    <h1 className="text-3xl font-bold text-gray-800 mb-4 capitalize">
-      {category?.replace("-", " & ")}
-    </h1>
-    <p className="text-gray-600">Browse products in this category.</p>
-  </div>
-);
+// const CategoryPage = ({ category }) => (
+//   <div className="container mx-auto px-4 py-8">
+//     <h1 className="text-3xl font-bold text-gray-800 mb-4 capitalize">
+//       {category?.replace("-", " & ")}
+//     </h1>
+//     <p className="text-gray-600">Browse products in this category.</p>
+//   </div>
+// );
 
 const SubMenuPage = ({ parent, item }) => (
   <div className="container mx-auto px-4 py-8">
@@ -97,8 +104,8 @@ function AppRoutes() {
   return (
     <>
       <Header />
-
-      <Routes>
+      <div className="pt-[152px]">
+        <Routes>
         {/* Main Pages */}
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
@@ -111,17 +118,7 @@ function AppRoutes() {
         <Route path="/deals" element={<DealsPage />} />
 
         {/* Category Routes */}
-        <Route path="/category/electronics" element={<CategoryPage category="electronics" />} />
-        <Route path="/category/fashion" element={<CategoryPage category="fashion" />} />
-        <Route path="/category/home-living" element={<CategoryPage category="home-living" />} />
-        <Route path="/category/beauty-care" element={<CategoryPage category="beauty-care" />} />
-        <Route path="/category/sports" element={<CategoryPage category="sports" />} />
-        <Route path="/category/books" element={<CategoryPage category="books" />} />
-        <Route path="/category/toys-games" element={<CategoryPage category="toys-games" />} />
-        <Route path="/category/automotive" element={<CategoryPage category="automotive" />} />
-        <Route path="/category/grocery" element={<CategoryPage category="grocery" />} />
-        <Route path="/category/health" element={<CategoryPage category="health" />} />
-
+        <Route path="/category/:category" element={<CategoryPage />} />
         {/* Submenu Routes */}
         <Route path="/mega-menu/item-1" element={<SubMenuPage parent="Mega Menu" item="item-1" />} />
         <Route path="/mega-menu/item-2" element={<SubMenuPage parent="Mega Menu" item="item-2" />} />
@@ -130,6 +127,7 @@ function AppRoutes() {
         <Route path="/pages/item-2" element={<SubMenuPage parent="Pages" item="item-2" />} />
         <Route path="/pages/item-3" element={<SubMenuPage parent="Pages" item="item-3" />} />
       </Routes>
+      </div>
     </>
   );
 }

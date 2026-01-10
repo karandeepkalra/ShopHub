@@ -49,12 +49,12 @@ export const Slider = () => {
             <img
               src={slide.image}
               alt={`slide-${index}`}
-              className="absolute inset-0 w-full h-full object-fit"
+              className="absolute inset-0 w-full h-full object-cover"
             />
 
             {/* Overlay Content */}
             <div className="relative z-10 h-full flex items-center">
-              <div className="max-w-xl px-12">
+              <div className="w-full px-12">
                 <h1 className="text-4xl font-bold text-gray-800 whitespace-pre-line">
                   {slide.title}
                 </h1>
@@ -62,22 +62,24 @@ export const Slider = () => {
                 <p className="mt-4 text-gray-600">
                   {slide.subtitle}
                 </p>
-
-                {/* Email Input */}
-                <div className="mt-6 flex max-w-md bg-white rounded-full overflow-hidden shadow">
-                  <input
-                    type="email"
-                    placeholder="Your Email Address..."
-                    className="flex-1 px-4 py-3 outline-none"
-                  />
-                  <button className="bg-green-500 text-white px-6 font-semibold">
-                    Subscribe
-                  </button>
-                </div>
               </div>
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Email Input - Outside sliding container */}
+      <div className="absolute bottom-20 left-12 z-20 max-w-md">
+        <div className="flex bg-white rounded-full overflow-hidden shadow">
+          <input
+            type="email"
+            placeholder="Your Email Address..."
+            className="flex-1 px-4 py-3 outline-none"
+          />
+          <button className="bg-green-500 text-white px-6 font-semibold">
+            Subscribe
+          </button>
+        </div>
       </div>
     </div>
   );
