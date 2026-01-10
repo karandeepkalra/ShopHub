@@ -424,7 +424,7 @@ const ProductCatalog = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-6">Popular Products</h1>
           
-          {/* Category Tabs */}
+          
           <div className="flex flex-wrap gap-6 border-b border-gray-200 pb-1">
             {categories.map((category) => (
               <button
