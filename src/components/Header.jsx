@@ -1,15 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { Search, Heart, ShoppingCart, MapPin, User, GitCompare, Settings, LogOut } from "lucide-react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { Navbar } from "./Navbar";
 import CustomDropdown from "./CustomDropdown";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
+import { useCart } from "../context/CartContext";
+
 const Header = () => {
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [selectedState, setSelectedState] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [countryList, setCountryList] = useState([]);
   const [showAccountMenu, setShowAccountMenu] = useState(false);
+  const navigate = useNavigate();
+  const { getCartCount } = useCart();
 
   const categories = [
     "All Categories",
@@ -97,12 +102,23 @@ const Header = () => {
             />
 
             <div className="flex items-center gap-5">
-              <button className="hidden md:block hover:scale-110 transition-transform">
+              <button 
+                onClick={() => navigate('/wishlist')}
+                className="hidden md:block hover:scale-110 transition-transform relative"
+              >
                 <Heart className="w-6 h-6 text-gray-700 hover:text-green-600 transition-colors" />
               </button>
 
-              <button className="hover:scale-110 transition-transform">
+              <button 
+                onClick={() => navigate('/cart')}
+                className="hover:scale-110 transition-transform relative"
+              >
                 <ShoppingCart className="w-6 h-6 text-gray-700 hover:text-green-600 transition-colors" />
+                {getCartCount() > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                    {getCartCount()}
+                  </span>
+                )}
               </button>
 
               <button className="hover:scale-110 transition-transform">
@@ -137,7 +153,10 @@ const Header = () => {
                         My Voucher
                       </li>
 
-                      <li className="px-4 py-2 hover:text-green-600 flex items-center gap-3 cursor-pointer">
+                      <li 
+                        onClick={() => navigate('/wishlist')}
+                        className="px-4 py-2 hover:text-green-600 flex items-center gap-3 cursor-pointer"
+                      >
                         <Heart className="w-4 h-4 text-gray-600" />
                         My Wishlist
                       </li>

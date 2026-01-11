@@ -1,11 +1,4 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import ProductCard from '../components/ProductCard';
-import PriceFilter from '../components/PriceFilter';
-import RatingFilter from '../components/RatingFilter';
-import SalesBanner from '../components/SalesBanner';
-
-// Product data - Later move this to a separate file
+// Product data
 export const allProducts = {
   electronics: [
     { 
@@ -299,42 +292,612 @@ export const allProducts = {
       badgeColor: 'bg-blue-400'
     },
   ],
+  'Dals And Pulses': [
+      {
+        id: 101,
+        tag: 'Hot',
+        tagColor: 'bg-pink-500',
+        image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400&h=400&fit=crop',
+        brand: 'AASHIRVAAD',
+        name: 'Good Life Whole Moong 500 g',
+        rating: 3.5,
+        price: 20,
+        originalPrice: 140
+      },
+      {
+        id: 102,
+        tag: 'New',
+        tagColor: 'bg-green-500',
+        image: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=400&h=400&fit=crop',
+        brand: 'Private Label',
+        name: 'Moong Dal 2 kg',
+        rating: 4,
+        price: 246,
+        originalPrice: 320
+      },
+      {
+        id: 103,
+        tag: 'Hot',
+        tagColor: 'bg-pink-500',
+        image: 'https://images.unsplash.com/photo-1599909421556-23b9f97da1e1?w=400&h=400&fit=crop',
+        brand: 'Good Life',
+        name: 'Good Life Raw Peanuts 500 g',
+        rating: 3.5,
+        price: 89,
+        originalPrice: 150
+      },
+      {
+        id: 104,
+        tag: 'Sale',
+        tagColor: 'bg-blue-400',
+        image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400&h=400&fit=crop',
+        brand: 'Tata Sampann',
+        name: 'Tata Sampann Moong 500 g',
+        rating: 4,
+        price: 74,
+        originalPrice: 95
+      },
+      {
+        id: 105,
+        tag: 'Hot',
+        tagColor: 'bg-pink-500',
+        image: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=400&h=400&fit=crop',
+        brand: 'Good Life',
+        name: 'Good Life Moong Dal 1 kg',
+        rating: 4.5,
+        price: 145,
+        originalPrice: 189
+      }
+    ],
+    'Ghee & Oils': [
+      {
+        id: 106,
+        tag: 'Hot',
+        tagColor: 'bg-pink-500',
+        image: 'https://images.unsplash.com/photo-1628278342011-c3de8ce6e4e7?w=400&h=400&fit=crop',
+        brand: 'Gowardhan',
+        name: 'Gowardhan Pure Cow Ghee 1 L (Jar)',
+        rating: 3.5,
+        price: 676,
+        originalPrice: 820
+      },
+      {
+        id: 107,
+        tag: 'New',
+        tagColor: 'bg-green-500',
+        image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=400&fit=crop',
+        brand: 'Nestle',
+        name: 'Nestle EveryDay Ghee 1 L (Carton)',
+        rating: 4,
+        price: 579,
+        originalPrice: 620
+      },
+      {
+        id: 108,
+        tag: 'Sale',
+        tagColor: 'bg-blue-400',
+        image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=400&fit=crop',
+        brand: 'Amul',
+        name: 'Amul Cow Ghee 1 L (Pouch)',
+        rating: 3.5,
+        price: 250,
+        originalPrice: 300
+      },
+      {
+        id: 109,
+        tag: 'Hot',
+        tagColor: 'bg-pink-500',
+        image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=400&fit=crop',
+        brand: 'Amul',
+        name: 'Amul Cow Ghee 500 ml (Pouch)',
+        rating: 4,
+        price: 300,
+        originalPrice: 380
+      }
+    ],
+    'Atta & Flours': [
+      {
+        id: 110,
+        tag: 'Hot',
+        tagColor: 'bg-pink-500',
+        image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop',
+        brand: 'Aashirvaad',
+        name: 'Aashirvaad Superior MP Whole Wheat Atta 5 kg',
+        rating: 3.5,
+        price: 320,
+        originalPrice: 380
+      },
+      {
+        id: 111,
+        tag: 'New',
+        tagColor: 'bg-green-500',
+        image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=400&fit=crop',
+        brand: 'Aashirvaad',
+        name: 'Aashirvaad Select Sharbati Whole Wheat Atta 5 kg',
+        rating: 4,
+        price: 350,
+        originalPrice: 380
+      },
+      {
+        id: 112,
+        tag: 'Sale',
+        tagColor: 'bg-blue-400',
+        image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop',
+        brand: 'Aashirvaad',
+        name: 'Aashirvaad Superior MP Whole Wheat Atta 10 kg',
+        rating: 3.5,
+        price: 250,
+        originalPrice: 300
+      },
+      {
+        id: 113,
+        tag: 'Hot',
+        tagColor: 'bg-pink-500',
+        image: 'https://images.unsplash.com/photo-1574168370583-0c1f08916b86?w=400&h=400&fit=crop',
+        brand: 'Private Label',
+        name: 'Chakki Atta 10 kg',
+        rating: 4,
+        price: 400,
+        originalPrice: 500
+      }
+    ],
+    'Masalas Spices': [
+      {
+        id: 114,
+        tag: 'Hot',
+        tagColor: 'bg-pink-500',
+        image: 'https://images.unsplash.com/photo-1596040033229-a0b3b83d5b1f?w=400&h=400&fit=crop',
+        brand: 'MDH',
+        name: 'MDH Garam Masala 100 g',
+        rating: 4.5,
+        price: 85,
+        originalPrice: 110
+      },
+      {
+        id: 115,
+        tag: 'Sale',
+        tagColor: 'bg-blue-400',
+        image: 'https://images.unsplash.com/photo-1599909421557-c02a4f9d3c4f?w=400&h=400&fit=crop',
+        brand: 'Everest',
+        name: 'Everest Turmeric Powder 200 g',
+        rating: 4,
+        price: 95,
+        originalPrice: 120
+      },
+      {
+        id: 116,
+        tag: 'New',
+        tagColor: 'bg-green-500',
+        image: 'https://images.unsplash.com/photo-1596040033229-a0b3b83d5b1f?w=400&h=400&fit=crop',
+        brand: 'Tata Sampann',
+        name: 'Tata Sampann Red Chilli Powder 200 g',
+        rating: 4,
+        price: 110,
+        originalPrice: 140
+      },
+      {
+        id: 117,
+        tag: 'Hot',
+        tagColor: 'bg-pink-500',
+        image: 'https://images.unsplash.com/photo-1599909421557-c02a4f9d3c4f?w=400&h=400&fit=crop',
+        brand: 'MDH',
+        name: 'MDH Coriander Powder 100 g',
+        rating: 4,
+        price: 65,
+        originalPrice: 85
+      }
+    ],
+    'Rice & Rice Products': [
+      {
+        id: 118,
+        tag: 'Hot',
+        tagColor: 'bg-pink-500',
+        image: 'https://images.unsplash.com/photo-1516684732162-798a0062be99?w=400&h=400&fit=crop',
+        brand: 'India Gate',
+        name: 'India Gate Basmati Rice 5 kg',
+        rating: 4.5,
+        price: 650,
+        originalPrice: 750
+      },
+      {
+        id: 119,
+        tag: 'New',
+        tagColor: 'bg-green-500',
+        image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop',
+        brand: 'Daawat',
+        name: 'Daawat Brown Rice 1 kg',
+        rating: 4,
+        price: 180,
+        originalPrice: 220
+      },
+      {
+        id: 120,
+        tag: 'Sale',
+        tagColor: 'bg-blue-400',
+        image: 'https://images.unsplash.com/photo-1516684732162-798a0062be99?w=400&h=400&fit=crop',
+        brand: 'Fortune',
+        name: 'Fortune Biryani Special Rice 5 kg',
+        rating: 4,
+        price: 450,
+        originalPrice: 550
+      },
+      {
+        id: 121,
+        tag: 'Hot',
+        tagColor: 'bg-pink-500',
+        image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop',
+        brand: 'Kohinoor',
+        name: 'Kohinoor Super Basmati Rice 1 kg',
+        rating: 4.5,
+        price: 220,
+        originalPrice: 260
+      }
+    ],
+    'Mobiles & Tablets': [
+      {
+        id: 122,
+        tag: 'Hot',
+        tagColor: 'bg-pink-500',
+        image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop',
+        brand: 'Samsung',
+        name: 'Samsung Galaxy S23 128GB',
+        rating: 4.5,
+        price: 54999,
+        originalPrice: 64999
+      },
+      {
+        id: 123,
+        tag: 'New',
+        tagColor: 'bg-green-500',
+        image: 'https://images.unsplash.com/photo-1585060544812-6b45742d762f?w=400&h=400&fit=crop',
+        brand: 'Apple',
+    },
+    {
+      id: 107,
+      tag: 'New',
+      tagColor: 'bg-green-500',
+      image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=400&fit=crop',
+      brand: 'Nestle',
+      name: 'Nestle EveryDay Ghee 1 L (Carton)',
+      rating: 4,
+      price: 579,
+      originalPrice: 620
+    },
+    {
+      id: 108,
+      tag: 'Sale',
+      tagColor: 'bg-blue-400',
+      image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=400&fit=crop',
+      brand: 'Amul',
+      name: 'Amul Cow Ghee 1 L (Pouch)',
+      rating: 3.5,
+      price: 250,
+      originalPrice: 300
+    },
+    {
+      id: 109,
+      tag: 'Hot',
+      tagColor: 'bg-pink-500',
+      image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=400&fit=crop',
+      brand: 'Amul',
+      name: 'Amul Cow Ghee 500 ml (Pouch)',
+      rating: 4,
+      price: 300,
+      originalPrice: 380
+    }
+  ],
+  'Atta & Flours': [
+    {
+      id: 110,
+      tag: 'Hot',
+      tagColor: 'bg-pink-500',
+      image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop',
+      brand: 'Aashirvaad',
+      name: 'Aashirvaad Superior MP Whole Wheat Atta 5 kg',
+      rating: 3.5,
+      price: 320,
+      originalPrice: 380
+    },
+    {
+      id: 111,
+      tag: 'New',
+      tagColor: 'bg-green-500',
+      image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=400&fit=crop',
+      brand: 'Aashirvaad',
+      name: 'Aashirvaad Select Sharbati Whole Wheat Atta 5 kg',
+      rating: 4,
+      price: 350,
+      originalPrice: 380
+    },
+    {
+      id: 112,
+      tag: 'Sale',
+      tagColor: 'bg-blue-400',
+      image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop',
+      brand: 'Aashirvaad',
+      name: 'Aashirvaad Superior MP Whole Wheat Atta 10 kg',
+      rating: 3.5,
+      price: 250,
+      originalPrice: 300
+    },
+    {
+      id: 113,
+      tag: 'Hot',
+      tagColor: 'bg-pink-500',
+      image: 'https://images.unsplash.com/photo-1574168370583-0c1f08916b86?w=400&h=400&fit=crop',
+      brand: 'Private Label',
+      name: 'Chakki Atta 10 kg',
+      rating: 4,
+      price: 400,
+      originalPrice: 500
+    }
+  ],
+  'Masalas Spices': [
+    {
+      id: 114,
+      tag: 'Hot',
+      tagColor: 'bg-pink-500',
+      image: 'https://images.unsplash.com/photo-1596040033229-a0b3b83d5b1f?w=400&h=400&fit=crop',
+      brand: 'MDH',
+      name: 'MDH Garam Masala 100 g',
+      rating: 4.5,
+      price: 85,
+      originalPrice: 110
+    },
+    {
+      id: 115,
+      tag: 'Sale',
+      tagColor: 'bg-blue-400',
+      image: 'https://images.unsplash.com/photo-1599909421557-c02a4f9d3c4f?w=400&h=400&fit=crop',
+      brand: 'Everest',
+      name: 'Everest Turmeric Powder 200 g',
+      rating: 4,
+      price: 95,
+      originalPrice: 120
+    },
+    {
+      id: 116,
+      tag: 'New',
+      tagColor: 'bg-green-500',
+      image: 'https://images.unsplash.com/photo-1596040033229-a0b3b83d5b1f?w=400&h=400&fit=crop',
+      brand: 'Tata Sampann',
+      name: 'Tata Sampann Red Chilli Powder 200 g',
+      rating: 4,
+      price: 110,
+      originalPrice: 140
+    },
+    {
+      id: 117,
+      tag: 'Hot',
+      tagColor: 'bg-pink-500',
+      image: 'https://images.unsplash.com/photo-1599909421557-c02a4f9d3c4f?w=400&h=400&fit=crop',
+      brand: 'MDH',
+      name: 'MDH Coriander Powder 100 g',
+      rating: 4,
+      price: 65,
+      originalPrice: 85
+    }
+  ],
+  'Rice & Rice Products': [
+    {
+      id: 118,
+      tag: 'Hot',
+      tagColor: 'bg-pink-500',
+      image: 'https://images.unsplash.com/photo-1516684732162-798a0062be99?w=400&h=400&fit=crop',
+      brand: 'India Gate',
+      name: 'India Gate Basmati Rice 5 kg',
+      rating: 4.5,
+      price: 650,
+      originalPrice: 750
+    },
+    {
+      id: 119,
+      tag: 'New',
+      tagColor: 'bg-green-500',
+      image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop',
+      brand: 'Daawat',
+      name: 'Daawat Brown Rice 1 kg',
+      rating: 4,
+      price: 180,
+      originalPrice: 220
+    },
+    {
+      id: 120,
+      tag: 'Sale',
+      tagColor: 'bg-blue-400',
+      image: 'https://images.unsplash.com/photo-1516684732162-798a0062be99?w=400&h=400&fit=crop',
+      brand: 'Fortune',
+      name: 'Fortune Biryani Special Rice 5 kg',
+      rating: 4,
+      price: 450,
+      originalPrice: 550
+    },
+    {
+      id: 121,
+      tag: 'Hot',
+      tagColor: 'bg-pink-500',
+      image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop',
+      brand: 'Kohinoor',
+      name: 'Kohinoor Super Basmati Rice 1 kg',
+      rating: 4.5,
+      price: 220,
+      originalPrice: 260
+    }
+  ],
+  'Mobiles & Tablets': [
+    {
+      id: 122,
+      tag: 'Hot',
+      tagColor: 'bg-pink-500',
+      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop',
+      brand: 'Samsung',
+      name: 'Samsung Galaxy S23 128GB',
+      rating: 4.5,
+      price: 54999,
+      originalPrice: 64999
+    },
+    {
+      id: 123,
+      tag: 'New',
+      tagColor: 'bg-green-500',
+      image: 'https://images.unsplash.com/photo-1585060544812-6b45742d762f?w=400&h=400&fit=crop',
+      brand: 'Apple',
+      name: 'iPad Air 64GB WiFi',
+      rating: 5,
+      price: 54900,
+      originalPrice: 59900
+    },
+    {
+      id: 124,
+      tag: 'Sale',
+      tagColor: 'bg-blue-400',
+      image: 'https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=400&h=400&fit=crop',
+      brand: 'OnePlus',
+      name: 'OnePlus 11R 5G 128GB',
+      rating: 4,
+      price: 34999,
+      originalPrice: 39999
+    },
+    {
+      id: 125,
+      tag: 'Hot',
+      tagColor: 'bg-pink-500',
+      image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&h=400&fit=crop',
+      brand: 'Xiaomi',
+      name: 'Xiaomi Pad 6 128GB',
+      rating: 4,
+      price: 26999,
+      originalPrice: 29999
+    }
+  ],
+  'TV & Speaker': [
+    {
+      id: 126,
+      tag: 'Sale',
+      tagColor: 'bg-blue-400',
+      image: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=400&h=400&fit=crop',
+      brand: 'Sony',
+      name: 'Sony 55" 4K Smart TV',
+      rating: 4.5,
+      price: 52999,
+      originalPrice: 64999
+    },
+    {
+      id: 127,
+      tag: 'Hot',
+      tagColor: 'bg-pink-500',
+      image: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=400&fit=crop',
+      brand: 'JBL',
+      name: 'JBL Flip 6 Bluetooth Speaker',
+      rating: 4,
+      price: 9999,
+      originalPrice: 12999
+    },
+    {
+      id: 128,
+      tag: 'New',
+      tagColor: 'bg-green-500',
+      image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop',
+      brand: 'Samsung',
+      name: 'Samsung 43" Full HD Smart TV',
+      rating: 4,
+      price: 28999,
+      originalPrice: 34999
+    },
+    {
+      id: 129,
+      tag: 'Sale',
+      tagColor: 'bg-blue-400',
+      image: 'https://images.unsplash.com/photo-1589492477829-5e65395b66cc?w=400&h=400&fit=crop',
+      brand: 'boAt',
+      name: 'boAt Stone 1000 Bluetooth Speaker',
+      rating: 4,
+      price: 2499,
+      originalPrice: 3999
+    }
+  ],
+  'Men Western Wear': [
+    {
+      id: 130,
+      tag: 'New',
+      tagColor: 'bg-green-500',
+      image: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&h=400&fit=crop',
+      brand: 'Levis',
+      name: 'Levis Men Slim Fit Jeans',
+      rating: 4.5,
+      price: 2499,
+      originalPrice: 3499
+    },
+    {
+      id: 131,
+      tag: 'Sale',
+      tagColor: 'bg-blue-400',
+      image: 'https://images.unsplash.com/photo-1620799140188-3b2a02fd9a77?w=400&h=400&fit=crop',
+      brand: 'Allen Solly',
+      name: 'Allen Solly Casual Shirt',
+      rating: 4,
+      price: 1299,
+      originalPrice: 1999
+    },
+    {
+      id: 132,
+      tag: 'Hot',
+      tagColor: 'bg-pink-500',
+      image: 'https://images.unsplash.com/photo-1603252109303-2751441dd157?w=400&h=400&fit=crop',
+      brand: 'US Polo',
+      name: 'US Polo T-Shirt Regular Fit',
+      rating: 4,
+      price: 899,
+      originalPrice: 1499
+    },
+    {
+      id: 133,
+      tag: 'New',
+      tagColor: 'bg-green-500',
+      image: 'https://images.unsplash.com/photo-1602810316693-3667c854239a?w=400&h=400&fit=crop',
+      brand: 'Peter England',
+      name: 'Peter England Formal Trousers',
+      rating: 4,
+      price: 1599,
+      originalPrice: 2299
+    }
+  ],
   grocery: [
-    { 
-      id: 24, 
-      name: 'Good Life Whole Moong 500g', 
-      category: 'Grocery', 
-      brand: 'AASHIRVAAD', 
-      rating: 4, 
-      price: 20, 
-      originalPrice: 140, 
-      image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400', 
+    {
+      id: 134,
+      name: 'Good Life Whole Moong 500g',
+      category: 'Grocery',
+      brand: 'AASHIRVAAD',
+      rating: 4,
+      price: 20,
+      originalPrice: 140,
+      image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400',
       badge: 'Hot',
       badgeColor: 'bg-pink-500'
     },
-    { 
-      id: 25, 
-      name: 'Moong Dal 2 kg', 
-      category: 'Grocery', 
-      brand: 'Private Label', 
-      rating: 4, 
-      price: 246, 
-      originalPrice: 320, 
-      image: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=400', 
+    {
+      id: 135,
+      name: 'Moong Dal 2 kg',
+      category: 'Grocery',
+      brand: 'Private Label',
+      rating: 4,
+      price: 246,
+      originalPrice: 320,
+      image: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=400',
       badge: 'New',
       badgeColor: 'bg-green-500'
     },
   ],
   health: [
-    { 
-      id: 26, 
-      name: 'Multivitamin Tablets', 
-      category: 'Health', 
-      brand: 'HealthPlus', 
-      rating: 5, 
-      price: 399, 
-      originalPrice: 599, 
-      image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400', 
+    {
+      id: 136,
+      name: 'Multivitamin Tablets',
+      category: 'Health',
+      brand: 'HealthPlus',
+      rating: 5,
+      price: 399,
+      originalPrice: 599,
+      image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400',
       badge: 'Hot',
       badgeColor: 'bg-pink-500'
     },

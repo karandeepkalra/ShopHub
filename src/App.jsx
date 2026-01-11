@@ -5,8 +5,14 @@ import Header from "./components/Header.jsx";
 import { Slider } from "./components/Slider.jsx";
 import { CategorySlider } from "./components/CategorySlider.jsx";
 import ProductCatalog from "./components/ProductCatalog.jsx";
+import { NotFound } from "./components/NotFound.jsx";
 import FeaturedProducts from "./components/FeaturedProducts.jsx";
 import CategoryPage from "./Pages/CategoryPage.jsx";
+import ProductDetailsPage from './components/ProductDetailsPage';
+import CartPage from './Pages/CartPage';
+import WishlistPage from './Pages/WishlistPage';
+import { allProducts } from "./data/Product.js";
+import { CartProvider } from "./context/CartContext.jsx";
 const HomePage = () => (
   <>
   <Slider/>
@@ -94,12 +100,12 @@ function AppRoutes() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
-    // FORCE HOME PAGE ON REFRESH / FIRST LOAD
-    if (location.pathname !== "/") {
-      navigate("/", { replace: true });
-    }
-  }, []);
+  // useEffect(() => {
+  //   // FORCE HOME PAGE ON REFRESH / FIRST LOAD
+  //   if (location.pathname !== "/") {
+  //     navigate("/", { replace: true });
+  //   }
+  // }, []);
 
   return (
     <>
@@ -117,6 +123,7 @@ function AppRoutes() {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/deals" element={<DealsPage />} />
 
+        {/*Not Found*/ }
         {/* Category Routes */}
         <Route path="/category/:category" element={<CategoryPage />} />
         {/* Submenu Routes */}
@@ -126,6 +133,10 @@ function AppRoutes() {
         <Route path="/pages/item-1" element={<SubMenuPage parent="Pages" item="item-1" />} />
         <Route path="/pages/item-2" element={<SubMenuPage parent="Pages" item="item-2" />} />
         <Route path="/pages/item-3" element={<SubMenuPage parent="Pages" item="item-3" />} />
+        <Route path="/product/:id" element={<ProductDetailsPage allProducts={allProducts} />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/wishlist" element={<WishlistPage />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       </div>
     </>
@@ -135,7 +146,9 @@ function AppRoutes() {
 function App() {
   return (
     <BrowserRouter>
-      <AppRoutes />
+      <CartProvider>
+        <AppRoutes />
+      </CartProvider>
     </BrowserRouter>
   );
 }
