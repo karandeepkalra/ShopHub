@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Search, Heart, ShoppingCart, MapPin, User, GitCompare, Settings, LogOut } from "lucide-react";
+import { Search, Heart, ShoppingCart, MapPin, User, GitCompare, Settings, LogOut, Menu, X } from "lucide-react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Navbar } from "./Navbar";
 import CustomDropdown from "./CustomDropdown";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
+import { logoutUser } from "../firebase/config";
+import AuthModal from "./AuthModal";
 
 const Header = () => {
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
@@ -13,20 +16,16 @@ const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [countryList, setCountryList] = useState([]);
   const [showAccountMenu, setShowAccountMenu] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authModalMessage, setAuthModalMessage] = useState('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const { getCartCount } = useCart();
+  const { getCartCount, getWishlistCount } = useCart();
+  const { isAuthenticated, user, logout } = useAuth();
 
   const categories = [
-    "All Categories",
-    "Electronics",
-    "Fashion",
-    "Home",
-    "Beauty & Personal Care",
-    "Sports & Outdoors",
-    "Books",
-    "Toys & Games",
-    "Automotive",
-    "Grocery",
+    "All Categories", "Electronics", "Fashion", "Home", "Beauty & Personal Care",
+    "Sports & Outdoors", "Books", "Toys & Games", "Automotive", "Grocery",
   ];
 
   useEffect(() => {
@@ -35,157 +34,194 @@ const Header = () => {
 
   const getCountries = async () => {
     try {
-      const res = await axios.get(
-        "https://restcountries.com/v3.1/all?fields=name"
-      );
-
-      const countries = res.data
-        .map((country) => country.name.common)
-        .sort();
-
+      const res = await axios.get("https://restcountries.com/v3.1/all?fields=name");
+      const countries = res.data.map((country) => country.name.common).sort();
       setCountryList(["All", ...countries]);
     } catch (error) {
       console.error("Country API error:", error);
     }
   };
 
+  const handleCartClick = () => {
+    if (!isAuthenticated) {
+      setAuthModalMessage('Please sign in to view your cart');
+      setShowAuthModal(true);
+    } else {
+      navigate('/cart');
+    }
+  };
+
+  const handleWishlistClick = () => {
+    if (!isAuthenticated) {
+      setAuthModalMessage('Please sign in to view your wishlist');
+      setShowAuthModal(true);
+    } else {
+      navigate('/wishlist');
+    }
+  };
+
+  const handleAccountClick = () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    } else {
+      setShowAccountMenu(prev => !prev);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      setShowAccountMenu(false);
+      navigate('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
   return (
     <>
-    <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-green-50 to-blue-50 border-b border-gray-200 shadow-sm">
-      <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-5 ">
-        <div className="flex items-center w-full gap-12">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm transition-all duration-300">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-3 lg:py-5">
+          <div className="flex items-center justify-between gap-4 lg:gap-12">
 
-          {/* Column 1: Logo - LEFT */}
-          <div className="flex-shrink-0 w-48">
-            <div className="h-12 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">ShopHub</span>
+            {/* Mobile Menu Toggle */}
+            <button
+              className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+
+            {/* Column 1: Logo */}
+            <Link to="/" className="flex-shrink-0 w-32 sm:w-40 lg:w-48">
+              <div className="h-10 lg:h-12 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-200/50">
+                <span className="text-white font-extrabold text-lg lg:text-xl tracking-tight italic">ShopHub</span>
+              </div>
+            </Link>
+
+            {/* Column 2: Search Bar - Desktop Only */}
+            <div className="hidden lg:flex flex-1 max-w-2xl">
+              <div className="flex items-center w-full bg-gray-50 rounded-xl border border-gray-200 focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-500/10 transition-all overflow-hidden">
+                <div className="border-r border-gray-200">
+                  <CustomDropdown
+                    options={categories}
+                    selectedValue={selectedCategory}
+                    onSelect={setSelectedCategory}
+                    className="px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-white w-40 justify-between"
+                    dropdownClassName="w-56"
+                  />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 px-4 py-2.5 bg-transparent text-sm outline-none"
+                />
+                <button className="px-6 py-2.5 bg-emerald-600 text-white hover:bg-emerald-700 transition-colors">
+                  <Search size={20} />
+                </button>
+              </div>
             </div>
-          </div>
 
-          {/* Column 2: Search Bar - CENTER */}
-          <div className="flex-1">
-            <div className="flex items-center bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-              <div className="border-r border-gray-200">
+            {/* Column 3: Actions */}
+            <div className="flex items-center gap-2 sm:gap-4 lg:gap-6">
+              <div className="hidden xl:block">
                 <CustomDropdown
-                  options={categories}
-                  selectedValue={selectedCategory}
-                  onSelect={setSelectedCategory}
-                  className="px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 w-44 justify-between"
-                  dropdownClassName="w-56"
+                  options={countryList}
+                  selectedValue={selectedState}
+                  onSelect={setSelectedState}
+                  icon={<MapPin className="w-4 h-4 text-emerald-600" />}
+                  className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium w-40"
+                  dropdownClassName="w-52"
+                  showSearch
                 />
               </div>
 
-              <input
-                type="text"
-                placeholder="Search for products, brands and more..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 px-4 py-3 text-sm outline-none"
-              />
-
-              <button className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-r-lg hover:from-green-700 hover:to-green-800 transition-colors">
-                <Search className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Column 3: Actions - RIGHT */}
-          <div className="flex-shrink-0 flex items-center gap-6">
-            <CustomDropdown
-              options={countryList}
-              selectedValue={selectedState}
-              onSelect={setSelectedState}
-              icon={<MapPin className="w-4 h-4 text-green-600" />}
-              className="hidden lg:flex px-3 py-2 bg-white rounded-lg text-sm text-gray-700 border border-gray-200 shadow-sm hover:shadow-md transition-shadow w-44 justify-between"
-              dropdownClassName="w-52"
-              showSearch
-            />
-
-            <div className="flex items-center gap-5">
-              <button 
-                onClick={() => navigate('/wishlist')}
-                className="hidden md:block hover:scale-110 transition-transform relative"
-              >
-                <Heart className="w-6 h-6 text-gray-700 hover:text-green-600 transition-colors" />
-              </button>
-
-              <button 
-                onClick={() => navigate('/cart')}
-                className="hover:scale-110 transition-transform relative"
-              >
-                <ShoppingCart className="w-6 h-6 text-gray-700 hover:text-green-600 transition-colors" />
-                {getCartCount() > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
-                    {getCartCount()}
+              <div className="flex items-center gap-1 sm:gap-3">
+                <button onClick={handleWishlistClick} className="p-2 text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-full transition-all relative group hidden sm:flex">
+                  <Heart size={22} />
+                  <span className="absolute -top-1 -right-1 bg-emerald-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">
+                    {getWishlistCount()}
                   </span>
-                )}
-              </button>
+                </button>
 
-              <button className="hover:scale-110 transition-transform">
-                <GitCompare className="w-6 h-6 text-gray-700 hover:text-green-600 transition-colors" />
-              </button>
+                <button onClick={handleCartClick} className="p-2 text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-full transition-all relative group">
+                  <ShoppingCart size={22} />
+                  {getCartCount() > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-emerald-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">
+                      {getCartCount()}
+                    </span>
+                  )}
+                </button>
 
-              <div className="relative">
-  <button
-    onClick={() => setShowAccountMenu(prev => !prev)}
-    className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg"
-  >
-    <User className="w-4 h-4" />
-    <span className="font-medium">Account</span>
-  </button>
+                <div className="relative">
+                  <button
+                    onClick={handleAccountClick}
+                    className="flex items-center gap-2 pl-2 pr-1 sm:px-4 py-2 bg-emerald-600 text-white rounded-xl shadow-lg shadow-emerald-200/50 hover:bg-emerald-700 transition-all"
+                  >
+                    <User size={18} />
+                    <span className="hidden sm:inline font-semibold text-sm">
+                      {isAuthenticated ? (user?.name?.split(' ')[0] || 'User') : 'Sign In'}
+                    </span>
+                  </button>
 
-  {showAccountMenu && (
-    <ClickAwayListener onClickAway={() => setShowAccountMenu(false)}>
-                  <div className="absolute right-0 mt-3 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                    <ul className="py-2 text-sm text-gray-700">
-                      <li className="px-4 py-2 hover:text-green-600 flex items-center gap-3 cursor-pointer">
-                        <User className="w-4 h-4 text-gray-600" />
-                        My Account
-                      </li>
-
-                      <li className="px-4 py-2 hover:text-green-600 flex items-center gap-3 cursor-pointer">
-                        <MapPin className="w-4 h-4 text-gray-600" />
-                        Order Tracking
-                      </li>
-
-                      <li className="px-4 py-2 hover:text-green-600 flex items-center gap-3 cursor-pointer">
-                        <ShoppingCart className="w-4 h-4 text-gray-600" />
-                        My Voucher
-                      </li>
-
-                      <li 
-                        onClick={() => navigate('/wishlist')}
-                        className="px-4 py-2 hover:text-green-600 flex items-center gap-3 cursor-pointer"
-                      >
-                        <Heart className="w-4 h-4 text-gray-600" />
-                        My Wishlist
-                      </li>
-
-                      <li className="px-4 py-2 hover:text-green-600 flex items-center gap-3 cursor-pointer">
-                        <Settings className="w-4 h-4 text-gray-600" />
-                        Settings
-                      </li>
-
-
-                      <li className="px-4 py-2 hover:text-green-600 flex items-center gap-3 cursor-pointer">
-                        <LogOut className="w-4 h-4" />
-                        Sign Out
-                      </li>
-                    </ul>
-
-                  </div>
-                   </ClickAwayListener>
-                )}
+                  {showAccountMenu && isAuthenticated && (
+                    <ClickAwayListener onClickAway={() => setShowAccountMenu(false)}>
+                      <div className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden py-2 animate-in fade-in slide-in-from-top-2">
+                        <div className="px-4 py-3 border-b border-gray-50 mb-1">
+                          <p className="text-xs text-gray-400 font-medium">Hello,</p>
+                          <p className="font-bold text-gray-900 truncate">{user?.name}</p>
+                        </div>
+                        {[
+                          { icon: <User size={18} />, label: "My Profile" },
+                          { icon: <MapPin size={18} />, label: "Order Tracking" },
+                          { icon: <Heart size={18} />, label: "Wishlist", onClick: handleWishlistClick },
+                          { icon: <Settings size={18} />, label: "Settings" },
+                        ].map((item, idx) => (
+                          <div
+                            key={idx}
+                            onClick={() => { item.onClick?.(); setShowAccountMenu(false); }}
+                            className="px-4 py-2.5 hover:bg-emerald-50 hover:text-emerald-700 flex items-center gap-3 cursor-pointer text-sm font-medium text-gray-700 transition-colors"
+                          >
+                            <span className="text-gray-400 group-hover:text-emerald-600">{item.icon}</span>
+                            {item.label}
+                          </div>
+                        ))}
+                        <div className="mt-2 pt-2 border-t border-gray-50">
+                          <div onClick={handleLogout} className="px-4 py-2.5 hover:bg-red-50 hover:text-red-700 flex items-center gap-3 cursor-pointer text-sm font-medium text-red-600 transition-colors">
+                            <LogOut size={18} />
+                            Sign Out
+                          </div>
+                        </div>
+                      </div>
+                    </ClickAwayListener>
+                  )}
+                </div>
               </div>
-
             </div>
           </div>
 
+          {/* Mobile Search Bar */}
+          <div className="mt-3 lg:hidden relative">
+            <input
+              type="text"
+              placeholder="Search products..."
+              className="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            />
+            <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
+          </div>
         </div>
       </div>
-    </div>
-    <Navbar/>
-    </> 
+
+      <Navbar isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
+
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        message={authModalMessage}
+      />
+    </>
   );
 };
 

@@ -3,11 +3,13 @@ import { Star, ShoppingCart, Heart, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { allProducts } from '../data/Product';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 const ProductCatalog = () => {
   const [activeTab, setActiveTab] = useState('Dals And Pulses');
   const navigate = useNavigate();
   const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } = useCart();
+  const { isAuthenticated } = useAuth();
   
   const categories = [
     { label: 'Dals And Pulses', value: 'Dals And Pulses' },
@@ -20,25 +22,45 @@ const ProductCatalog = () => {
     { label: 'Men Western Wear', value: 'Men Western Wear' }
   ];
 
-  const StarRating = ({ rating }) => {
-    return (
-      <div className="flex gap-0.5">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            size={16}
-            className={
-              star <= Math.floor(rating)
-                ? 'fill-yellow-400 text-yellow-400'
-                : star === Math.ceil(rating) && rating % 1 !== 0
-                ? 'fill-yellow-400 text-yellow-400 opacity-50'
-                : 'fill-gray-200 text-gray-200'
-            }
-          />
-        ))}
-      </div>
-    );
-  };
+  const handleWishlistClick = (e, product) => {
+  e.stopPropagation();
+  if (!isAuthenticated) {
+    navigate('/login');
+    return;
+  }
+  if (isInWishlist(product.id)) {
+    removeFromWishlist(product.id);
+  } else {
+    addToWishlist(product);
+  }
+};
+
+const handleAddToCart = (e, product) => {
+  e.stopPropagation();
+  if (!isAuthenticated) {
+    navigate('/login');
+    return;
+  }
+  addToCart(product);
+};
+
+  const StarRating = ({ rating }) => (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Star
+          key={star}
+          size={16}
+          className={
+            star <= Math.floor(rating)
+              ? 'fill-yellow-400 text-yellow-400'
+              : star === Math.ceil(rating) && rating % 1 !== 0
+              ? 'fill-yellow-400 text-yellow-400 opacity-50'
+              : 'fill-gray-200 text-gray-200'
+          }
+        />
+      ))}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -84,14 +106,7 @@ const ProductCatalog = () => {
                 {/* Hover Icons */}
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 flex gap-3">
                   <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (isInWishlist(product.id)) {
-                        removeFromWishlist(product.id);
-                      } else {
-                        addToWishlist(product);
-                      }
-                    }}
+                    onClick={(e) => handleWishlistClick(e, product)}
                     className="bg-white rounded-lg p-3 shadow-lg hover:bg-gray-50 transition-colors"
                   >
                     <Heart 
@@ -143,10 +158,7 @@ const ProductCatalog = () => {
 
                 {/* Add Button */}
                 <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    addToCart(product);
-                  }}
+                  onClick={(e) => handleAddToCart(e, product)}
                   className="w-full bg-teal-100 hover:bg-teal-200 text-teal-700 font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
                   <ShoppingCart size={18} />

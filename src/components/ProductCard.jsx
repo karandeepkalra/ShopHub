@@ -1,9 +1,13 @@
 import React from 'react';
 import { Star, Heart, Eye, ShoppingCart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
+  const { addToCart, addToWishlist, isInWishlist } = useCart();
+  const { isAuthenticated } = useAuth();
 
   const StarRating = ({ rating }) => {
     return (
@@ -28,6 +32,24 @@ const ProductCard = ({ product }) => {
     navigate(`/product/${product.id}`);
   };
 
+  const handleAddToCart = async (e) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    await addToCart(product);
+  };
+
+  const handleAddToWishlist = async (e) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    await addToWishlist(product);
+  };
+
   return (
     <div 
       onClick={handleViewProduct}
@@ -40,13 +62,13 @@ const ProductCard = ({ product }) => {
         
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 flex gap-3">
           <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              // Add to wishlist logic
-            }}
-            className="bg-white rounded-lg p-3 shadow-lg hover:bg-gray-50 transition-colors"
+            onClick={handleAddToWishlist}
+            className={`bg-white rounded-lg p-3 shadow-lg hover:bg-gray-50 transition-colors ${
+              isInWishlist(product.id) ? 'text-red-500' : 'text-teal-600'
+            }`}
+            title={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
           >
-            <Heart size={20} className="text-teal-600" />
+            <Heart size={20} className={isInWishlist(product.id) ? 'fill-current' : ''} />
           </button>
           <button 
             onClick={handleViewProduct}
@@ -83,10 +105,7 @@ const ProductCard = ({ product }) => {
           </span>
         </div>
         <button 
-          onClick={(e) => {
-            e.stopPropagation();
-            // Add to cart logic
-          }}
+          onClick={handleAddToCart}
           className="w-full bg-teal-100 hover:bg-teal-200 text-teal-700 font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
         >
           <ShoppingCart size={18} />

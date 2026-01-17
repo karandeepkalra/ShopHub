@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Star, Heart, ShoppingCart, Share2, Minus, Plus } from 'lucide-react';
 import { allProducts } from '../data/Product';
+import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 const ProductDetailsPage = () => {
   const { id } = useParams();
@@ -9,7 +11,9 @@ const ProductDetailsPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState('50g');
-  
+  const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } = useCart();
+  const { isAuthenticated } = useAuth();
+
   // Review form state
   const [reviewForm, setReviewForm] = useState({
     name: '',
@@ -101,6 +105,36 @@ const ProductDetailsPage = () => {
       comment: ''
     });
     alert('Thank you for your review!');
+  };
+
+  const handleAddToCart = async () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    
+    // Add the product with selected quantity
+    const productWithQuantity = {
+      ...product,
+      quantity: quantity
+    };
+    
+    for (let i = 0; i < quantity; i++) {
+      await addToCart(product);
+    }
+  };
+
+  const handleWishlistToggle = async () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    
+    if (isInWishlist(product.id)) {
+      await removeFromWishlist(product.id);
+    } else {
+      await addToWishlist(product);
+    }
   };
 
   return (
@@ -219,14 +253,27 @@ const ProductDetailsPage = () => {
               </div>
 
               {/* Add to Cart Button */}
-              <button className="flex-1 bg-teal-500 hover:bg-teal-600 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2">
+              <button 
+                onClick={handleAddToCart}
+                className="flex-1 bg-teal-500 hover:bg-teal-600 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
                 <ShoppingCart size={20} />
                 Add to cart
               </button>
 
               {/* Wishlist Button */}
-              <button className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                <Heart size={20} className="text-gray-600" />
+              <button 
+                onClick={handleWishlistToggle}
+                className={`px-4 py-3 border rounded-lg transition-colors ${
+                  isInWishlist(product.id) 
+                    ? 'border-red-500 bg-red-50 text-red-500' 
+                    : 'border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                <Heart 
+                  size={20} 
+                  className={isInWishlist(product.id) ? 'fill-current' : ''} 
+                />
               </button>
 
               {/* Share Button */}

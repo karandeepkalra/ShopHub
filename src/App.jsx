@@ -11,14 +11,18 @@ import CategoryPage from "./Pages/CategoryPage.jsx";
 import ProductDetailsPage from './components/ProductDetailsPage';
 import CartPage from './Pages/CartPage';
 import WishlistPage from './Pages/WishlistPage';
+import LoginPage from './Pages/LoginPage';
+import RegisterPage from './Pages/RegisterPage';
+import ProtectedRoute from './components/ProtectedRoute';
 import { allProducts } from "./data/Product.js";
 import { CartProvider } from "./context/CartContext.jsx";
+import { AuthProvider } from "./context/AuthContext.jsx";
 const HomePage = () => (
   <>
-  <Slider/>
-  <CategorySlider/>
-  <ProductCatalog/>
-  <FeaturedProducts/>
+    <Slider />
+    <CategorySlider />
+    <ProductCatalog />
+    <FeaturedProducts />
   </>
 );
 
@@ -100,55 +104,65 @@ function AppRoutes() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // useEffect(() => {
-  //   // FORCE HOME PAGE ON REFRESH / FIRST LOAD
-  //   if (location.pathname !== "/") {
-  //     navigate("/", { replace: true });
-  //   }
-  // }, []);
-
   return (
     <>
       <Header />
-      <div className="pt-[152px]">
+      <div className="pt-[110px] lg:pt-[152px] min-h-screen">
         <Routes>
-        {/* Main Pages */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/shop" element={<ShopPage />} />
-        <Route path="/vendors" element={<VendorsPage />} />
-        <Route path="/mega-menu" element={<MegaMenuPage />} />
-        <Route path="/blog" element={<BlogPage />} />
-        <Route path="/pages" element={<PagesPage />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/deals" element={<DealsPage />} />
+          {/* Main Pages */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/shop" element={<ShopPage />} />
+          <Route path="/vendors" element={<VendorsPage />} />
+          <Route path="/mega-menu" element={<MegaMenuPage />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/pages" element={<PagesPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/deals" element={<DealsPage />} />
 
-        {/*Not Found*/ }
-        {/* Category Routes */}
-        <Route path="/category/:category" element={<CategoryPage />} />
-        {/* Submenu Routes */}
-        <Route path="/mega-menu/item-1" element={<SubMenuPage parent="Mega Menu" item="item-1" />} />
-        <Route path="/mega-menu/item-2" element={<SubMenuPage parent="Mega Menu" item="item-2" />} />
-        <Route path="/mega-menu/item-3" element={<SubMenuPage parent="Mega Menu" item="item-3" />} />
-        <Route path="/pages/item-1" element={<SubMenuPage parent="Pages" item="item-1" />} />
-        <Route path="/pages/item-2" element={<SubMenuPage parent="Pages" item="item-2" />} />
-        <Route path="/pages/item-3" element={<SubMenuPage parent="Pages" item="item-3" />} />
-        <Route path="/product/:id" element={<ProductDetailsPage allProducts={allProducts} />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/wishlist" element={<WishlistPage />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          {/* Category Routes */}
+          <Route path="/category/:category" element={<CategoryPage />} />
+
+          {/* Submenu Routes */}
+          <Route path="/mega-menu/item-1" element={<SubMenuPage parent="Mega Menu" item="item-1" />} />
+          <Route path="/mega-menu/item-2" element={<SubMenuPage parent="Mega Menu" item="item-2" />} />
+          <Route path="/mega-menu/item-3" element={<SubMenuPage parent="Mega Menu" item="item-3" />} />
+          <Route path="/pages/item-1" element={<SubMenuPage parent="Pages" item="item-1" />} />
+          <Route path="/pages/item-2" element={<SubMenuPage parent="Pages" item="item-2" />} />
+          <Route path="/pages/item-3" element={<SubMenuPage parent="Pages" item="item-3" />} />
+
+          <Route path="/product/:id" element={<ProductDetailsPage allProducts={allProducts} />} />
+
+          <Route path="/cart" element={
+            <ProtectedRoute>
+              <CartPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/wishlist" element={
+            <ProtectedRoute>
+              <WishlistPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </div>
     </>
   );
 }
 
+
 function App() {
   return (
     <BrowserRouter>
-      <CartProvider>
-        <AppRoutes />
-      </CartProvider>
+      <AuthProvider>
+        <CartProvider>
+          <AppRoutes />
+        </CartProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
