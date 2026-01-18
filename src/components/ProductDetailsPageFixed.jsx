@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Star, Heart, ShoppingCart, Share2, Minus, Plus, User } from 'lucide-react';
+import { Star, Heart, ShoppingCart, Share2, Minus, Plus } from 'lucide-react';
 import { db } from '../firebase/config';
-import { doc, getDoc, collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, getDocs } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -24,8 +24,6 @@ const ProductDetailsPage = () => {
     comment: ''
   });
   const [hoverRating, setHoverRating] = useState(0);
-  const [reviews, setReviews] = useState([]);
-  const [averageRating, setAverageRating] = useState(0);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -54,74 +52,6 @@ const ProductDetailsPage = () => {
     };
 
     fetchProduct();
-  }, [id]);
-
-  useEffect(() => {
-    if (!id) return;
-
-    const reviewsRef = collection(db, 'reviews');
-    
-    // First try without ordering to avoid index requirement
-    const q = query(
-      reviewsRef,
-      where('productId', '==', id)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      console.log('Reviews snapshot:', snapshot.docs.length, 'reviews found');
-      const reviewsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      // Sort client-side by createdAt (newest first)
-      const sortedReviews = reviewsData.sort((a, b) => {
-        const timeA = a.createdAt?.toSeconds?.() || a.createdAt?.seconds || 0;
-        const timeB = b.createdAt?.toSeconds?.() || b.createdAt?.seconds || 0;
-        return timeB - timeA;
-      });
-      
-      console.log('Processed reviews:', sortedReviews);
-      setReviews(sortedReviews);
-      
-      if (sortedReviews.length > 0) {
-        const totalRating = sortedReviews.reduce((sum, review) => sum + review.rating, 0);
-        const avgRating = totalRating / sortedReviews.length;
-        setAverageRating(Math.round(avgRating * 10) / 10); 
-      } else {
-        setAverageRating(0);
-      }
-    }, (error) => {
-      console.error('Error fetching reviews:', error);
-      // Fallback to one-time fetch if real-time fails
-      getDocs(q).then(querySnapshot => {
-        const reviewsData = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        
-        // Sort client-side
-        const sortedReviews = reviewsData.sort((a, b) => {
-          const timeA = a.createdAt?.toSeconds?.() || a.createdAt?.seconds || 0;
-          const timeB = b.createdAt?.toSeconds?.() || b.createdAt?.seconds || 0;
-          return timeB - timeA;
-        });
-        
-        setReviews(sortedReviews);
-        
-        if (sortedReviews.length > 0) {
-          const totalRating = sortedReviews.reduce((sum, review) => sum + review.rating, 0);
-          const avgRating = totalRating / sortedReviews.length;
-          setAverageRating(Math.round(avgRating * 10) / 10); 
-        } else {
-          setAverageRating(0);
-        }
-      }).catch(fetchError => {
-        console.error('Fallback fetch also failed:', fetchError);
-      });
-    });
-
-    return () => unsubscribe();
   }, [id]);
 
   const images = product?.images && product.images.length > 0 
@@ -166,37 +96,16 @@ const ProductDetailsPage = () => {
     }));
   };
 
-  const handleReviewSubmit = async (e) => {
+  const handleReviewSubmit = (e) => {
     e.preventDefault();
-    
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-
-    try {
-      const reviewsRef = collection(db, 'reviews');
-      await addDoc(reviewsRef, {
-        productId: id,
-        name: reviewForm.name,
-        email: reviewForm.email,
-        rating: reviewForm.rating,
-        comment: reviewForm.comment,
-        createdAt: serverTimestamp()
-      });
-
-      setReviewForm({
-        name: '',
-        email: '',
-        rating: 0,
-        comment: ''
-      });
-      
-      alert('Thank you for your review!');
-    } catch (error) {
-      console.error('Error submitting review:', error);
-      alert('Failed to submit review. Please try again.');
-    }
+    console.log('Review submitted:', reviewForm);
+    setReviewForm({
+      name: '',
+      email: '',
+      rating: 0,
+      comment: ''
+    });
+    alert('Thank you for your review!');
   };
 
   const handleAddToCart = async () => {
@@ -295,13 +204,8 @@ const ProductDetailsPage = () => {
             </h1>
 
             <div className="flex items-center gap-3 mb-4">
-              <StarRating rating={averageRating || 0} />
-              <span className="text-gray-600">({reviews.length} Reviews)</span>
-              {averageRating > 0 && (
-                <span className="text-teal-600 font-medium">
-                  {averageRating.toFixed(1)} out of 5
-                </span>
-              )}
+              <StarRating rating={product.rating || 0} />
+              <span className="text-gray-600">(32) Reviews</span>
             </div>
 
             <div className="flex items-center gap-3 mb-6">
@@ -540,45 +444,6 @@ const ProductDetailsPage = () => {
             </div>
           </form>
         </div>
-
-        {/* Reviews Display Section */}
-        {reviews.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm p-6 mt-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Customer Reviews</h2>
-            <div className="space-y-6">
-              {reviews.map((review) => (
-                <div key={review.id} className="border-b border-gray-200 pb-6 last:border-b-0">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                      <User size={20} className="text-gray-500" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <h3 className="font-semibold text-gray-800">{review.name}</h3>
-                          <div className="flex items-center gap-2 mt-1">
-                            <StarRating rating={review.rating} />
-                            <span className="text-sm text-gray-600">
-                              {review.rating}.0
-                            </span>
-                          </div>
-                        </div>
-                        <span className="text-sm text-gray-500">
-                          {review.createdAt && 
-                            new Date(review.createdAt.toDate()).toLocaleDateString()
-                          }
-                        </span>
-                      </div>
-                      <p className="text-gray-600 leading-relaxed">
-                        {review.comment}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

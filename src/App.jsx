@@ -14,6 +14,10 @@ import WishlistPage from './Pages/WishlistPage';
 import LoginPage from './Pages/LoginPage';
 import RegisterPage from './Pages/RegisterPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminRoute from './components/AdminRoute';
+import VendorRoute from './components/VendorRoute';
+import AdminPanel from './Pages/AdminPanel';
+import VendorPanel from './Pages/VendorPanel';
 import { allProducts } from "./data/Product.js";
 import { CartProvider } from "./context/CartContext.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
@@ -75,10 +79,10 @@ const ContactPage = () => (
   </div>
 );
 
-const DealsPage = () => (
+const TestPage = () => (
   <div className="container mx-auto px-4 py-8">
-    <h1 className="text-3xl font-bold text-gray-800 mb-4">Special Deals</h1>
-    <p className="text-gray-600">Check out our amazing deals and offers!</p>
+    <h1 className="text-3xl font-bold text-gray-800 mb-4">Test Page</h1>
+    <p className="text-gray-600">This is a test page to verify routing works.</p>
   </div>
 );
 
@@ -118,7 +122,7 @@ function AppRoutes() {
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/pages" element={<PagesPage />} />
           <Route path="/contact" element={<ContactPage />} />
-          <Route path="/deals" element={<DealsPage />} />
+          <Route path="/deals" element={<TestPage />} />
 
           {/* Category Routes */}
           <Route path="/category/:category" element={<CategoryPage />} />
@@ -147,6 +151,21 @@ function AppRoutes() {
 
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          
+          <Route path="/admin" element={
+            <AdminRoute>
+              <AdminPanel />
+            </AdminRoute>
+          } />
+          
+          <Route path="/vendor" element={
+            <VendorRoute>
+              <VendorPanel />
+            </VendorRoute>
+          } />
+          
+          <Route path="/admin-test" element={<TestPage />} />
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>

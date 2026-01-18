@@ -1,11 +1,13 @@
 import { useParams } from "react-router-dom";
-import { useState } from "react";
-import { allProducts } from "../data/Product";
+import { useState, useEffect, useRef } from "react";
+import { db } from "../firebase/config";
+import { collection, getDocs } from "firebase/firestore";
 import ProductCard from "../components/ProductCard";
 import {PriceFilter} from "../components/PriceFilter"
 import { ChevronDown } from "lucide-react";
 import {RatingFilter} from "../components/RatingFilter"
 import SalesBanner from "../components/SalesBanner"
+
 const CategoryPage = () => {
   const { category } = useParams();
   const [minPrice, setMinPrice] = useState(100);
@@ -15,8 +17,47 @@ const CategoryPage = () => {
   const [sortBy, setSortBy] = useState("featured");
   const [showDropdownOpen, setShowDropdownOpen] = useState(false);
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const products = allProducts[category] || allProducts.smartphones || [];
+  const showDropdownRef = useRef(null);
+  const sortDropdownRef = useRef(null);
+
+  // Fetch products from Firebase
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const productsCollection = collection(db, 'products');
+        const productSnapshot = await getDocs(productsCollection);
+        const productList = productSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setProducts(productList);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showDropdownRef.current && !showDropdownRef.current.contains(event.target)) {
+        setShowDropdownOpen(false);
+      }
+      if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target)) {
+        setSortDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handlePriceChange = (min, max) => {
     setMinPrice(min);
@@ -33,9 +74,10 @@ const CategoryPage = () => {
 
   // Filter products
   const filteredProducts = products.filter(product => {
+    const categoryMatch = !category || product.category?.toLowerCase() === category.toLowerCase();
     const priceMatch = product.price >= minPrice && product.price <= maxPrice;
     const ratingMatch = selectedRatings.length === 0 || selectedRatings.includes(product.rating);
-    return priceMatch && ratingMatch;
+    return categoryMatch && priceMatch && ratingMatch;
   });
 
   // Sort products
@@ -98,7 +140,7 @@ const CategoryPage = () => {
             {/* Filter Controls */}
             <div className="flex gap-4 mb-6">
               {/* Show Dropdown */}
-              <div className="relative">
+              <div className="relative" ref={showDropdownRef}>
                 <button
                   onClick={() => setShowDropdownOpen(!showDropdownOpen)}
                   className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
@@ -108,7 +150,7 @@ const CategoryPage = () => {
                 </button>
                 
                 {showDropdownOpen && (
-                  <div className="absolute z-90 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg">
+                  <div className="absolute z-50 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg">
                     {showOptions.map((option) => (
                       <button
                         key={option}
@@ -126,7 +168,7 @@ const CategoryPage = () => {
               </div>
 
               {/* Sort By Dropdown */}
-              <div className="relative">
+              <div className="relative" ref={sortDropdownRef}>
                 <button
                   onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
                   className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
@@ -159,16 +201,24 @@ const CategoryPage = () => {
             </div>
 
             {/* Products Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-
-            {filteredProducts.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">No products found matching your filters.</p>
+            {loading ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="text-lg text-gray-600">Loading products...</div>
               </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {displayProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+
+                {filteredProducts.length === 0 && (
+                  <div className="text-center py-12">
+                    <p className="text-gray-500 text-lg">No products found matching your filters.</p>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

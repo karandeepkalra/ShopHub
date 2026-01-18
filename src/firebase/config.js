@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, setPersistence, browserLocalPersistence } from "firebase/auth";
-import { getFirestore, doc, setDoc, getDoc, collection, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc, collection, updateDoc, arrayUnion, arrayRemove, addDoc, deleteDoc, getDocs } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 // TODO: Replace with your Firebase project config
@@ -40,20 +40,31 @@ export const registerUser = async (email, password, userData) => {
     
     console.log('User created in Firebase:', user);
     
-    // Create user document in Firestore
+    // Create user document in Firestore with role and vendor info
     const userRef = doc(db, "users", user.uid);
-    await setDoc(userRef, {
+    const userDocData = {
       uid: user.uid,
       email: userData.email,
       name: userData.name,
+      role: userData.role || 'user',
       cart: [],
       wishlist: [],
       createdAt: new Date().toISOString()
-    });
+    };
+
+    // Add vendor-specific fields if role is vendor
+    if (userData.role === 'vendor') {
+      userDocData.businessName = userData.businessName;
+      userDocData.category = userData.category;
+      userDocData.description = userData.description;
+      userDocData.vendorStatus = userData.vendorStatus || 'pending';
+    }
+
+    await setDoc(userRef, userDocData);
     
-    console.log('User document created in Firestore');
+    console.log('User document created in Firestore with role:', userData.role);
     
-    return { success: true, user: { uid: user.uid, email: userData.email, name: userData.name } };
+    return { success: true, user: { uid: user.uid, email: userData.email, name: userData.name, role: userData.role } };
   } catch (error) {
     console.error('Firebase registration error:', error);
     let errorMessage = "Registration failed";

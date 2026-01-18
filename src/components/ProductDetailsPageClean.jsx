@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Star, Heart, ShoppingCart, Share2, Minus, Plus, User } from 'lucide-react';
+import { Star, Heart, ShoppingCart, Share2, Minus, Plus } from 'lucide-react';
 import { db } from '../firebase/config';
-import { doc, getDoc, collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, getDocs } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -17,6 +17,7 @@ const ProductDetailsPage = () => {
   const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } = useCart();
   const { isAuthenticated } = useAuth();
 
+  // Review form state
   const [reviewForm, setReviewForm] = useState({
     name: '',
     email: '',
@@ -24,9 +25,8 @@ const ProductDetailsPage = () => {
     comment: ''
   });
   const [hoverRating, setHoverRating] = useState(0);
-  const [reviews, setReviews] = useState([]);
-  const [averageRating, setAverageRating] = useState(0);
 
+  // Fetch product from Firebase
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -39,6 +39,7 @@ const ProductDetailsPage = () => {
             ...productDoc.data()
           };
           setProduct(productData);
+          // Set default selected size if available
           if (productData.sizes && productData.sizes.length > 0) {
             setSelectedSize(productData.sizes[0]);
           }
@@ -56,80 +57,14 @@ const ProductDetailsPage = () => {
     fetchProduct();
   }, [id]);
 
-  useEffect(() => {
-    if (!id) return;
-
-    const reviewsRef = collection(db, 'reviews');
-    
-    // First try without ordering to avoid index requirement
-    const q = query(
-      reviewsRef,
-      where('productId', '==', id)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      console.log('Reviews snapshot:', snapshot.docs.length, 'reviews found');
-      const reviewsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      // Sort client-side by createdAt (newest first)
-      const sortedReviews = reviewsData.sort((a, b) => {
-        const timeA = a.createdAt?.toSeconds?.() || a.createdAt?.seconds || 0;
-        const timeB = b.createdAt?.toSeconds?.() || b.createdAt?.seconds || 0;
-        return timeB - timeA;
-      });
-      
-      console.log('Processed reviews:', sortedReviews);
-      setReviews(sortedReviews);
-      
-      if (sortedReviews.length > 0) {
-        const totalRating = sortedReviews.reduce((sum, review) => sum + review.rating, 0);
-        const avgRating = totalRating / sortedReviews.length;
-        setAverageRating(Math.round(avgRating * 10) / 10); 
-      } else {
-        setAverageRating(0);
-      }
-    }, (error) => {
-      console.error('Error fetching reviews:', error);
-      // Fallback to one-time fetch if real-time fails
-      getDocs(q).then(querySnapshot => {
-        const reviewsData = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        
-        // Sort client-side
-        const sortedReviews = reviewsData.sort((a, b) => {
-          const timeA = a.createdAt?.toSeconds?.() || a.createdAt?.seconds || 0;
-          const timeB = b.createdAt?.toSeconds?.() || b.createdAt?.seconds || 0;
-          return timeB - timeA;
-        });
-        
-        setReviews(sortedReviews);
-        
-        if (sortedReviews.length > 0) {
-          const totalRating = sortedReviews.reduce((sum, review) => sum + review.rating, 0);
-          const avgRating = totalRating / sortedReviews.length;
-          setAverageRating(Math.round(avgRating * 10) / 10); 
-        } else {
-          setAverageRating(0);
-        }
-      }).catch(fetchError => {
-        console.error('Fallback fetch also failed:', fetchError);
-      });
-    });
-
-    return () => unsubscribe();
-  }, [id]);
-
+  // Mock additional images - use product images if available, otherwise fallback
   const images = product?.images && product.images.length > 0 
     ? product.images 
     : product?.image 
       ? [product.image] 
       : ['https://images.unsplash.com/photo-1560493676-04071c5f467b?w=400'];
 
+  // Dynamic sizes from product data or fallback
   const sizes = product?.sizes && product.sizes.length > 0
     ? product.sizes
     : [];
@@ -166,37 +101,19 @@ const ProductDetailsPage = () => {
     }));
   };
 
-  const handleReviewSubmit = async (e) => {
+  const handleReviewSubmit = (e) => {
     e.preventDefault();
+    console.log('Review submitted:', reviewForm);
+    // Add your review submission logic here
     
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-
-    try {
-      const reviewsRef = collection(db, 'reviews');
-      await addDoc(reviewsRef, {
-        productId: id,
-        name: reviewForm.name,
-        email: reviewForm.email,
-        rating: reviewForm.rating,
-        comment: reviewForm.comment,
-        createdAt: serverTimestamp()
-      });
-
-      setReviewForm({
-        name: '',
-        email: '',
-        rating: 0,
-        comment: ''
-      });
-      
-      alert('Thank you for your review!');
-    } catch (error) {
-      console.error('Error submitting review:', error);
-      alert('Failed to submit review. Please try again.');
-    }
+    // Reset form after submission
+    setReviewForm({
+      name: '',
+      email: '',
+      rating: 0,
+      comment: ''
+    });
+    alert('Thank you for your review!');
   };
 
   const handleAddToCart = async () => {
@@ -205,6 +122,7 @@ const ProductDetailsPage = () => {
       return;
     }
     
+    // Add product with selected quantity and size
     const productWithQuantity = {
       ...product,
       quantity: quantity,
@@ -258,8 +176,11 @@ const ProductDetailsPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4">
+        {/* Product Details Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 bg-white rounded-lg shadow-sm p-6 mb-8">
+          {/* Left - Product Images */}
           <div>
+            {/* Main Image */}
             <div className="mb-4 rounded-lg overflow-hidden border border-gray-200">
               <img
                 src={images[selectedImage]}
@@ -268,6 +189,7 @@ const ProductDetailsPage = () => {
               />
             </div>
 
+            {/* Thumbnail Images */}
             <div className="grid grid-cols-4 gap-3">
               {images.map((img, index) => (
                 <button
@@ -289,21 +211,19 @@ const ProductDetailsPage = () => {
             </div>
           </div>
 
+          {/* Right - Product Details */}
           <div>
             <h1 className="text-3xl font-bold text-gray-800 mb-3">
               {product.name}
             </h1>
 
+            {/* Rating */}
             <div className="flex items-center gap-3 mb-4">
-              <StarRating rating={averageRating || 0} />
-              <span className="text-gray-600">({reviews.length} Reviews)</span>
-              {averageRating > 0 && (
-                <span className="text-teal-600 font-medium">
-                  {averageRating.toFixed(1)} out of 5
-                </span>
-              )}
+              <StarRating rating={product.rating || 0} />
+              <span className="text-gray-600">(32) Reviews</span>
             </div>
 
+            {/* Price */}
             <div className="flex items-center gap-3 mb-6">
               <span className="text-4xl font-bold text-teal-600">
                 ${product.price}
@@ -320,10 +240,12 @@ const ProductDetailsPage = () => {
               )}
             </div>
 
+            {/* Description */}
             <p className="text-gray-600 mb-6 leading-relaxed">
               {product.description || 'No description available.'}
             </p>
 
+            {/* Size / Weight Selector */}
             {sizes && sizes.length > 0 && (
               <div className="mb-6">
                 <label className="text-gray-700 font-medium mb-3 block">
@@ -347,7 +269,9 @@ const ProductDetailsPage = () => {
               </div>
             )}
 
+            {/* Quantity and Actions */}
             <div className="flex gap-4 mb-6">
+              {/* Quantity Selector */}
               <div className="flex items-center border border-gray-300 rounded-lg">
                 <button
                   onClick={() => handleQuantityChange('decrement')}
@@ -369,6 +293,7 @@ const ProductDetailsPage = () => {
                 </button>
               </div>
 
+              {/* Add to Cart Button */}
               <button 
                 onClick={handleAddToCart}
                 className="flex-1 bg-teal-500 hover:bg-teal-600 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
@@ -377,6 +302,7 @@ const ProductDetailsPage = () => {
                 Add to cart
               </button>
 
+              {/* Wishlist Button */}
               <button 
                 onClick={handleWishlistToggle}
                 className={`px-4 py-3 border rounded-lg transition-colors ${
@@ -391,11 +317,13 @@ const ProductDetailsPage = () => {
                 />
               </button>
 
+              {/* Share Button */}
               <button className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                 <Share2 size={20} className="text-gray-600" />
               </button>
             </div>
 
+            {/* Product Info */}
             <div className="border-t border-gray-200 pt-6 space-y-3">
               {product.category && (
                 <div className="flex">
@@ -444,11 +372,14 @@ const ProductDetailsPage = () => {
           </div>
         </div>
 
+        {/* Review Form Section */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Write a Review</h2>
           
           <form onSubmit={handleReviewSubmit} className="space-y-6">
+            {/* Name and Email Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Name Input */}
               <div>
                 <label htmlFor="name" className="block text-gray-700 font-medium mb-2">
                   Your Name <span className="text-red-500">*</span>
@@ -465,6 +396,7 @@ const ProductDetailsPage = () => {
                 />
               </div>
 
+              {/* Email Input */}
               <div>
                 <label htmlFor="email" className="block text-gray-700 font-medium mb-2">
                   Your Email <span className="text-red-500">*</span>
@@ -482,6 +414,7 @@ const ProductDetailsPage = () => {
               </div>
             </div>
 
+            {/* Rating Input */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
                 Your Rating <span className="text-red-500">*</span>
@@ -514,6 +447,7 @@ const ProductDetailsPage = () => {
               </div>
             </div>
 
+            {/* Comment Textarea */}
             <div>
               <label htmlFor="comment" className="block text-gray-700 font-medium mb-2">
                 Your Review <span className="text-red-500">*</span>
@@ -530,6 +464,7 @@ const ProductDetailsPage = () => {
               />
             </div>
 
+            {/* Submit Button */}
             <div>
               <button
                 type="submit"
@@ -540,45 +475,6 @@ const ProductDetailsPage = () => {
             </div>
           </form>
         </div>
-
-        {/* Reviews Display Section */}
-        {reviews.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm p-6 mt-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Customer Reviews</h2>
-            <div className="space-y-6">
-              {reviews.map((review) => (
-                <div key={review.id} className="border-b border-gray-200 pb-6 last:border-b-0">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                      <User size={20} className="text-gray-500" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <h3 className="font-semibold text-gray-800">{review.name}</h3>
-                          <div className="flex items-center gap-2 mt-1">
-                            <StarRating rating={review.rating} />
-                            <span className="text-sm text-gray-600">
-                              {review.rating}.0
-                            </span>
-                          </div>
-                        </div>
-                        <span className="text-sm text-gray-500">
-                          {review.createdAt && 
-                            new Date(review.createdAt.toDate()).toLocaleDateString()
-                          }
-                        </span>
-                      </div>
-                      <p className="text-gray-600 leading-relaxed">
-                        {review.comment}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

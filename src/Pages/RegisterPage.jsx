@@ -1,23 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { registerUser } from '../firebase/config';
-import { Eye, EyeOff, Mail, Lock, User, UserPlus } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, UserPlus, Store, Package } from 'lucide-react';
+import VendorNotification from '../components/VendorNotification';
+
+const CATEGORIES = [
+  'Electronics',
+  'Fashion',
+  'Home & Garden',
+  'Sports & Outdoors',
+  'Books & Media',
+  'Toys & Games',
+  'Health & Beauty',
+  'Automotive',
+  'Food & Beverages',
+  'Other'
+];
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    role: 'user', // 'user' | 'vendor'
+    businessName: '',
+    category: '',
+    description: ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showVendorNotification, setShowVendorNotification] = useState(false);
 
-  const { register } = useAuth();
+  const { register, updateUserRole } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -43,40 +62,68 @@ const RegisterPage = () => {
         return;
       }
 
+      // Validate vendor fields if role is vendor
+      if (formData.role === 'vendor') {
+        if (!formData.businessName.trim()) {
+          setError('Business name is required for vendors');
+          setLoading(false);
+          return;
+        }
+        if (!formData.category) {
+          setError('Please select a business category');
+          setLoading(false);
+          return;
+        }
+      }
+
       // Use Firebase authentication
       const result = await registerUser(formData.email, formData.password, {
         name: formData.name,
-        email: formData.email
+        email: formData.email,
+        role: formData.role,
+        businessName: formData.businessName,
+        category: formData.category,
+        description: formData.description,
+        vendorStatus: formData.role === 'vendor' ? 'pending' : null
       });
       
       console.log('Registration result:', result);
       
       if (result.success) {
-        // Registration successful - show success message and redirect to login
-        setSuccess('Account created successfully! Redirecting to login...');
+        // Registration successful
+        const message = formData.role === 'vendor' 
+          ? 'Vendor registration submitted! Your account is pending admin approval.'
+          : 'Account created successfully!';
+        
+        setSuccess(message + ' Redirecting to login...');
         console.log('Registration successful, redirecting to login...');
-        setLoading(false); // Stop loading immediately
+        setLoading(false);
+        
+        // Show vendor notification if role is vendor
+        if (formData.role === 'vendor') {
+          setShowVendorNotification(true);
+        }
         
         setTimeout(() => {
           console.log('Redirecting now...');
           navigate('/login?registered=true');
-        }, 2000);
+        }, 3000);
       } else {
         // Registration failed - show error from Firebase
         console.log('Registration failed:', result.error);
         setError(result.error);
-        setLoading(false); // Stop loading on error
+        setLoading(false);
       }
     } catch (err) {
       console.error('Registration error:', err);
       setError('Registration failed. Please try again.');
-      setLoading(false); // Stop loading on catch
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+      <div className="max-w-2xl w-full space-y-8">
         <div>
           <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-teal-600">
             <UserPlus className="h-6 w-6 text-white" />
@@ -106,6 +153,55 @@ const RegisterPage = () => {
           )}
           
           <div className="space-y-4">
+            {/* Role Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Account Type
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                <label className="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50">
+                  <input
+                    type="radio"
+                    name="role"
+                    value="user"
+                    checked={formData.role === 'user'}
+                    onChange={handleChange}
+                    className="sr-only"
+                  />
+                  <div className={`flex items-center w-full ${
+                    formData.role === 'user' ? 'text-teal-600 border-teal-500' : 'text-gray-600'
+                  }`}>
+                    <User className="h-5 w-5 mr-2" />
+                    <div>
+                      <div className="font-medium">Customer</div>
+                      <div className="text-xs">Buy products</div>
+                    </div>
+                  </div>
+                </label>
+                
+                <label className="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50">
+                  <input
+                    type="radio"
+                    name="role"
+                    value="vendor"
+                    checked={formData.role === 'vendor'}
+                    onChange={handleChange}
+                    className="sr-only"
+                  />
+                  <div className={`flex items-center w-full ${
+                    formData.role === 'vendor' ? 'text-teal-600 border-teal-500' : 'text-gray-600'
+                  }`}>
+                    <Store className="h-5 w-5 mr-2" />
+                    <div>
+                      <div className="font-medium">Vendor</div>
+                      <div className="text-xs">Sell products</div>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            {/* Basic Info */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                 Full Name
@@ -149,6 +245,66 @@ const RegisterPage = () => {
                 />
               </div>
             </div>
+            
+            {/* Vendor Fields */}
+            {formData.role === 'vendor' && (
+              <div className="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900 flex items-center">
+                  <Package className="h-5 w-5 mr-2" />
+                  Business Information
+                </h3>
+                
+                <div>
+                  <label htmlFor="businessName" className="block text-sm font-medium text-gray-700">
+                    Business Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="businessName"
+                    name="businessName"
+                    type="text"
+                    required={formData.role === 'vendor'}
+                    className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm"
+                    placeholder="Enter your business name"
+                    value={formData.businessName}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+                    Product Category <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="category"
+                    name="category"
+                    required={formData.role === 'vendor'}
+                    className="appearance-none relative block w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm"
+                    value={formData.category}
+                    onChange={handleChange}
+                  >
+                    <option value="">Select a category</option>
+                    {CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                    Business Description
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    rows="3"
+                    className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm resize-none"
+                    placeholder="Describe your business and products"
+                    value={formData.description}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            )}
             
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
@@ -226,7 +382,7 @@ const RegisterPage = () => {
               className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
             />
             <label htmlFor="agree-terms" className="ml-2 block text-sm text-gray-900">
-              I agree to the{' '}
+              I agree to{' '}
               <a href="#" className="text-teal-600 hover:text-teal-500">
                 Terms and Conditions
               </a>{' '}
@@ -234,6 +390,11 @@ const RegisterPage = () => {
               <a href="#" className="text-teal-600 hover:text-teal-500">
                 Privacy Policy
               </a>
+              {formData.role === 'vendor' && (
+                <span className="block text-xs text-orange-600 mt-1">
+                  Vendor accounts require admin approval before you can add products.
+                </span>
+              )}
             </label>
           </div>
 
@@ -243,11 +404,20 @@ const RegisterPage = () => {
               disabled={loading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Creating account...' : 'Create account'}
+              {loading ? 'Creating account...' : 
+               formData.role === 'vendor' ? 'Submit Vendor Application' : 'Create account'}
             </button>
           </div>
         </form>
       </div>
+      
+      {/* Vendor Notification */}
+      {showVendorNotification && (
+        <VendorNotification 
+          vendorStatus="pending" 
+          onClose={() => setShowVendorNotification(false)}
+        />
+      )}
     </div>
   );
 };

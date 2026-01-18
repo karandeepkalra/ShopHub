@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Search, Heart, ShoppingCart, MapPin, User, GitCompare, Settings, LogOut, Menu, X } from "lucide-react";
+import { Search, Heart, ShoppingCart, MapPin, User, GitCompare, Settings, LogOut, Menu, X, Shield, Store } from "lucide-react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import { Navbar } from "./Navbar";
@@ -21,7 +21,14 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { getCartCount, getWishlistCount } = useCart();
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, userRole, vendorStatus } = useAuth();
+  
+  const adminEmail = 'karandeepkaur0089@gmail.com';
+  const isAdmin = isAuthenticated && user?.email === adminEmail;
+  const isVendor = isAuthenticated && userRole === 'vendor';
+  
+  // Debug logging
+  console.log('Header Debug:', { isAuthenticated, userEmail: user?.email, isAdmin });
 
   const categories = [
     "All Categories", "Electronics", "Fashion", "Home", "Beauty & Personal Care",
@@ -139,6 +146,26 @@ const Header = () => {
               </div>
 
               <div className="flex items-center gap-1 sm:gap-3">
+                {/* Temporary admin link for testing */}
+                {isAdmin && (
+                  <button 
+                    onClick={() => navigate('/admin')}
+                    className="px-3 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700"
+                  >
+                    Admin
+                  </button>
+                )}
+                
+                {/* Vendor panel link */}
+                {isVendor && (
+                  <button 
+                    onClick={() => navigate('/vendor')}
+                    className="px-3 py-1 bg-emerald-600 text-white text-xs rounded hover:bg-emerald-700"
+                  >
+                    Vendor
+                  </button>
+                )}
+                
                 <button onClick={handleWishlistClick} className="p-2 text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-full transition-all relative group hidden sm:flex">
                   <Heart size={22} />
                   <span className="absolute -top-1 -right-1 bg-emerald-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">
@@ -172,13 +199,16 @@ const Header = () => {
                         <div className="px-4 py-3 border-b border-gray-50 mb-1">
                           <p className="text-xs text-gray-400 font-medium">Hello,</p>
                           <p className="font-bold text-gray-900 truncate">{user?.name}</p>
+                          {isAdmin && (
+                            <p className="text-xs text-emerald-600 font-medium mt-1">Admin User</p>
+                          )}
+                          {isVendor && (
+                            <p className="text-xs text-emerald-600 font-medium mt-1">
+                              {vendorStatus === 'approved' ? 'Approved Vendor' : vendorStatus === 'pending' ? 'Pending Vendor' : 'Rejected Vendor'}
+                            </p>
+                          )}
                         </div>
-                        {[
-                          { icon: <User size={18} />, label: "My Profile" },
-                          { icon: <MapPin size={18} />, label: "Order Tracking" },
-                          { icon: <Heart size={18} />, label: "Wishlist", onClick: handleWishlistClick },
-                          { icon: <Settings size={18} />, label: "Settings" },
-                        ].map((item, idx) => (
+                        {[{ icon: <User size={18} />, label: "My Profile" }, { icon: <MapPin size={18} />, label: "Order Tracking" }, { icon: <Heart size={18} />, label: "Wishlist", onClick: handleWishlistClick }, { icon: <Settings size={18} />, label: "Settings" }, ...(isAdmin ? [{ icon: <Shield size={18} />, label: "Admin Panel", onClick: () => { navigate('/admin'); setShowAccountMenu(false); } }] : []), ...(isVendor ? [{ icon: <Store size={18} />, label: "Vendor Panel", onClick: () => { navigate('/vendor'); setShowAccountMenu(false); } }] : [])].map((item, idx) => (
                           <div
                             key={idx}
                             onClick={() => { item.onClick?.(); setShowAccountMenu(false); }}
