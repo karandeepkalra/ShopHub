@@ -14,45 +14,40 @@ export const Navbar = ({ isMobileMenuOpen, setIsMobileMenuOpen }) => {
 
   const navigationLinks = [
     { name: "Home", path: "/" },
+    { name: "New Arrivals", path: "/new-arrivals" },
+    { name: "Men", path: "/category/men" },
+    { name: "Women", path: "/category/women" },
+    { name: "Kids", path: "/category/kids" },
+    { name: "Sale", path: "/sale" },
     { name: "About", path: "/about" },
-    { name: "Shop", path: "/shop" },
-    { name: "Vendors", path: "/vendors" },
-    {
-      name: "Mega menu",
-      path: "/mega-menu",
-      hasDropdown: true,
-      isMegaMenu: true,
-    },
-    { name: "Blog", path: "/blog" },
-    { name: "Pages", path: "/pages", hasDropdown: true },
     { name: "Contact", path: "/contact" },
   ];
 
   const categories = [
-    { name: "Electronics", icon: "📱", path: "/category/electronics" },
-    { name: "Fashion", icon: "👗", path: "/category/fashion" },
-    { name: "Home & Living", icon: "🏠", path: "/category/home-living" },
-    { name: "Beauty & Care", icon: "💄", path: "/category/beauty-care" },
-    { name: "Sports", icon: "⚽", path: "/category/sports" },
-    { name: "Books", icon: "📚", path: "/category/books" },
-    { name: "Toys & Games", icon: "🎮", path: "/category/toys-games" },
-    { name: "Automotive", icon: "🚗", path: "/category/automotive" },
-    { name: "Grocery", icon: "🛒", path: "/category/grocery" },
-    { name: "Health", icon: "⚕️", path: "/category/health" },
+    { name: "Men's Clothing", icon: "👔", path: "/category/men" },
+    { name: "Women's Clothing", icon: "👗", path: "/category/women" },
+    { name: "Kids & Baby", icon: "👶", path: "/category/kids" },
+    { name: "Shoes & Bags", icon: "👟", path: "/category/shoes-bags" },
+    { name: "Accessories", icon: "🧢", path: "/category/accessories" },
+    { name: "Activewear", icon: "🏃", path: "/category/activewear" },
+    { name: "Formal Wear", icon: "👔", path: "/category/formal" },
+    { name: "Summer Collection", icon: "☀️", path: "/category/summer" },
+    { name: "Winter Collection", icon: "❄️", path: "/category/winter" },
+    { name: "Sale Items", icon: "🛍️", path: "/sale" },
   ];
 
   const megaMenuCategories = [
     {
-      title: "Fruit & Vegetables",
-      items: ["Meat & Poultry", "Fresh Vegetables", "Herbs & Seasonings", "Cuts & Sprouts", "Exotic Fruits & Veggies", "Packaged Produce"],
+      title: "Men's Fashion",
+      items: ["T-Shirts & Polos", "Shirts", "Jeans & Pants", "Jackets & Coats", "Suits & Blazers", "Activewear"],
     },
     {
-      title: "Breakfast & Dairy",
-      items: ["Milk & Flavoured Milk", "Butter and Margarine", "Eggs Substitutes", "Marmalades", "Sour Cream", "Cheese"],
+      title: "Women's Fashion",
+      items: ["Dresses", "Tops & Blouses", "Jeans & Pants", "Skirts & Shorts", "Jackets & Coats", "Activewear"],
     },
     {
-      title: "Meat & Seafood",
-      items: ["Breakfast Sausage", "Dinner Sausage", "Chicken", "Sliced Deli Meat", "Wild Caught Fillets", "Crab and Shellfish"],
+      title: "Accessories",
+      items: ["Bags & Wallets", "Watches", "Sunglasses", "Hats & Caps", "Belts", "Jewelry"],
     },
   ];
 

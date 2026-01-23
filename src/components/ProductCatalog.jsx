@@ -1,66 +1,59 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Star, ShoppingCart, Heart, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { allProducts } from '../data/Product';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
-const ProductCatalog = () => {
-  const [activeTab, setActiveTab] = useState('Dals And Pulses');
+const ProductCatalog = ({ category = null, limit = 8 }) => {
   const navigate = useNavigate();
   const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } = useCart();
   const { isAuthenticated } = useAuth();
   
-  const categories = [
-    { label: 'Dals And Pulses', value: 'Dals And Pulses' },
-    { label: 'Ghee & Oils', value: 'Ghee & Oils' },
-    { label: 'Atta & Flours', value: 'Atta & Flours' },
-    { label: 'Masalas Spices', value: 'Masalas Spices' },
-    { label: 'Rice & Rice Products', value: 'Rice & Rice Products' },
-    { label: 'Mobiles & Tablets', value: 'Mobiles & Tablets' },
-    { label: 'TV & Speaker', value: 'TV & Speaker' },
-    { label: 'Men Western Wear', value: 'Men Western Wear' }
-  ];
+  // Filter products by category if specified
+  let products = [];
+  if (category) {
+    // If category is specified, get products from that category
+    products = allProducts[category.toLowerCase()] || [];
+  } else {
+    // Otherwise, combine all categories
+    products = Object.values(allProducts).flat();
+  }
+  
+  // Apply limit if specified
+  if (limit) {
+    products = products.slice(0, limit);
+  }
 
   const handleWishlistClick = (e, product) => {
-  e.stopPropagation();
-  if (!isAuthenticated) {
-    navigate('/login');
-    return;
-  }
-  if (isInWishlist(product.id)) {
-    removeFromWishlist(product.id);
-  } else {
-    addToWishlist(product);
-  }
-};
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product);
+    }
+  };
 
-const handleAddToCart = (e, product) => {
-  e.stopPropagation();
-  if (!isAuthenticated) {
-    navigate('/login');
-    return;
-  }
-  addToCart(product);
-};
+  const handleAddToCart = (e, product) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    addToCart(product);
+  };
 
-  const StarRating = ({ rating }) => (
-    <div className="flex gap-0.5">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <Star
-          key={star}
-          size={16}
-          className={
-            star <= Math.floor(rating)
-              ? 'fill-yellow-400 text-yellow-400'
-              : star === Math.ceil(rating) && rating % 1 !== 0
-              ? 'fill-yellow-400 text-yellow-400 opacity-50'
-              : 'fill-gray-200 text-gray-200'
-          }
-        />
-      ))}
-    </div>
-  );
+  if (products.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">No products found in this category.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -68,101 +61,63 @@ const handleAddToCart = (e, product) => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-6">Popular Products</h1>
-          
-          <div className="flex flex-wrap gap-6 border-b border-gray-200 pb-1">
-            {categories.map((category) => (
-              <button
-                key={category.value}
-                onClick={() => setActiveTab(category.value)}
-                className={`pb-3 px-1 text-sm font-medium transition-colors relative whitespace-nowrap ${
-                  activeTab === category.value
-                    ? 'text-teal-600'
-                    : 'text-gray-600 hover:text-gray-800'
-                }`}
-              >
-                {category.label}
-                {activeTab === category.value && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-teal-600"></div>
-                )}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {allProducts[activeTab]?.map((product) => (
+          {products.map((product) => (
             <div
               key={product.id}
+              className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer border border-gray-100 group"
               onClick={() => navigate(`/product/${product.id}`)}
-              className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow overflow-hidden border border-gray-100 group cursor-pointer"
             >
-              {/* Product Image */}
-              <div className="relative overflow-hidden">
-                <div className={`absolute top-3 left-3 ${product.tagColor} text-white px-3 py-1 rounded-full text-xs font-semibold z-10`}>
-                  {product.tag}
-                </div>
-                
-                {/* Hover Icons */}
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 flex gap-3">
-                  <button 
-                    onClick={(e) => handleWishlistClick(e, product)}
-                    className="bg-white rounded-lg p-3 shadow-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <Heart 
-                      size={20} 
-                      className={isInWishlist(product.id) ? "fill-red-500 text-red-500" : "text-teal-600"} 
-                    />
-                  </button>
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/product/${product.id}`);
-                    }}
-                    className="bg-white rounded-lg p-3 shadow-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <Eye size={20} className="text-teal-600" />
-                  </button>
-                </div>
-                
+              <div className="relative pt-[100%]">
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300"
+                  className="absolute top-0 left-0 w-full h-full object-cover"
                 />
-              </div>
-
-              {/* Product Details */}
-              <div className="p-4">
-                <p className="text-xs text-gray-500 mb-1">{product.brand}</p>
-                <h3 className="text-sm font-medium text-gray-800 mb-2 h-10 line-clamp-2">
-                  {product.name}
-                </h3>
-                
-                <div className="mb-3">
-                  <StarRating rating={product.rating} />
-                </div>
-
-                <div className="text-xs text-gray-500 mb-3">
-                  By {product.brand}
-                </div>
-
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-lg font-bold text-teal-600">
-                    Rs: {product.price}
+                {product.badge && (
+                  <span className={`absolute top-2 left-2 text-[10px] font-medium text-white px-1.5 py-0.5 rounded ${product.badgeColor || 'bg-blue-500'}`}>
+                    {product.badge}
                   </span>
-                  <span className="text-sm text-gray-400 line-through">
-                    Rs: {product.originalPrice}
-                  </span>
-                </div>
-
-                {/* Add Button */}
-                <button 
-                  onClick={(e) => handleAddToCart(e, product)}
-                  className="w-full bg-teal-100 hover:bg-teal-200 text-teal-700 font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
+                )}
+                <button
+                  onClick={(e) => handleWishlistClick(e, product)}
+                  className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full shadow-sm hover:bg-gray-100 transition-colors"
                 >
-                  <ShoppingCart size={18} />
-                  ADD
+                  <Heart
+                    size={16}
+                    className={isInWishlist(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-500'}
+                  />
+                </button>
+              </div>
+              <div className="p-3">
+                <h3 className="text-xs text-gray-800 mb-1 font-medium line-clamp-2 h-8">{product.name}</h3>
+                <p className="text-[11px] text-gray-500 mb-2">{product.brand}</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-bold text-gray-900">₹{product.price.toLocaleString()}</p>
+                    {product.originalPrice > product.price && (
+                      <div className="flex items-center">
+                        <span className="text-[10px] text-gray-500 line-through mr-1">₹{product.originalPrice.toLocaleString()}</span>
+                        <span className="text-[10px] font-medium text-green-600">
+                          {Math.round((1 - product.price / product.originalPrice) * 100)}% off
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  {product.sizes && (
+                    <div className="text-[10px] text-gray-500">
+                      Sizes: {product.sizes.join(', ')}
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={(e) => handleAddToCart(e, product)}
+                  className="w-full mt-2 py-1.5 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors"
+                >
+                  ADD TO CART
                 </button>
               </div>
             </div>

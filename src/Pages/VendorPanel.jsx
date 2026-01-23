@@ -5,7 +5,9 @@ import { collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, where, o
 import { useAuth } from '../context/AuthContext';
 
 const VendorPanel = () => {
-  const { user, vendorStatus } = useAuth();
+  console.log('VendorPanel component is being rendered!');
+  
+  const { user, vendorStatus, userRole } = useAuth();
   const [products, setProducts] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -17,6 +19,17 @@ const VendorPanel = () => {
   const isPending = vendorStatus === 'pending';
   const isRejected = vendorStatus === 'rejected';
 
+  // Debug console logs
+  console.log('VendorPanel Debug:', { 
+    user, 
+    userRole, 
+    vendorStatus, 
+    isApproved, 
+    isPending, 
+    isRejected,
+    loading
+  });
+
   // Show popup for pending vendors on first visit
   useEffect(() => {
     console.log('VendorPanel Debug:', { vendorStatus, isPending, user });
@@ -24,6 +37,9 @@ const VendorPanel = () => {
       setShowPendingPopup(true);
     }
   }, [isPending]);
+
+  // Add more debug info
+  console.log('VendorPanel - About to render, loading:', loading);
 
   const categories = [
     'Electronics', 'Fashion', 'Home', 'Beauty & Personal Care',
@@ -154,12 +170,47 @@ const VendorPanel = () => {
   };
 
   if (loading) {
+    console.log('VendorPanel - Loading state');
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-lg">Loading vendor dashboard...</div>
       </div>
     );
   }
+
+  // Show message if user is not logged in
+  if (!user) {
+    console.log('VendorPanel - No user');
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Not Logged In</h2>
+          <p className="text-gray-600 mb-6">Please log in to access the vendor dashboard.</p>
+          <a href="/login" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+            Go to Login
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  // Show message if user is not a vendor
+  if (userRole !== 'vendor') {
+    console.log('VendorPanel - Not a vendor, role:', userRole);
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
+          <p className="text-gray-600 mb-6">You don't have vendor privileges. Current role: {userRole}</p>
+          <a href="/" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+            Go to Home
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  console.log('VendorPanel - About to render main content');
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -188,11 +239,10 @@ const VendorPanel = () => {
             </div>
             <button
               onClick={() => setShowAddForm(true)}
-              disabled={!isApproved}
               className={`px-4 py-2 rounded-lg flex gap-2 transition-colors ${
                 isApproved 
                   ? 'bg-emerald-600 text-white hover:bg-emerald-700' 
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-yellow-600 text-white hover:bg-yellow-700'
               }`}
             >
               <Plus /> Add Product
@@ -274,13 +324,18 @@ const VendorPanel = () => {
         </div>
         )}
 
-        {/* ADD/EDIT PRODUCT FORM - ONLY SHOW FOR APPROVED VENDORS */}
-        {showAddForm && isApproved && (
+        {/* ADD/EDIT PRODUCT FORM - SHOW FOR ALL VENDORS */}
+        {showAddForm && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-gray-900">
                 {editingProduct ? 'Edit Product' : 'Add New Product'}
               </h2>
+              {!isApproved && (
+                <span className="text-sm text-yellow-600 bg-yellow-50 px-2 py-1 rounded">
+                  Products will be visible after approval
+                </span>
+              )}
               <button onClick={resetForm} className="text-gray-400 hover:text-gray-600">
                 <X size={24} />
               </button>
@@ -437,18 +492,18 @@ const VendorPanel = () => {
           </div>
         )}
 
-        {/* PRODUCTS LIST - ONLY SHOW FOR APPROVED VENDORS */}
-        {isApproved && (
+        {/* PRODUCTS LIST - SHOW FOR ALL VENDORS */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Products ({products.length})</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-900">Your Products</h2>
+            {!isApproved && products.length > 0 && (
+              <span className="text-sm text-yellow-600 bg-yellow-50 px-2 py-1 rounded">
+                Products will be visible after approval
+              </span>
+            )}
+          </div>
           
-          {products.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Products Yet</h3>
-              <p className="text-gray-600">Start by adding your first product to your store.</p>
-            </div>
-          ) : (
+          {products.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -519,9 +574,12 @@ const VendorPanel = () => {
                 </tbody>
               </table>
             </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No products added yet. Click "Add Product" to get started!</p>
+            </div>
           )}
         </div>
-        )}
       </div>
 
       {/* Pending Approval Popup */}

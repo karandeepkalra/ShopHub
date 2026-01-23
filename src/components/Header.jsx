@@ -26,9 +26,6 @@ const Header = () => {
   const adminEmail = 'karandeepkaur0089@gmail.com';
   const isAdmin = isAuthenticated && user?.email === adminEmail;
   const isVendor = isAuthenticated && userRole === 'vendor';
-  
-  // Debug logging
-  console.log('Header Debug:', { isAuthenticated, userEmail: user?.email, isAdmin });
 
   const categories = [
     "All Categories", "Electronics", "Fashion", "Home", "Beauty & Personal Care",
@@ -76,6 +73,13 @@ const Header = () => {
   };
 
   const handleLogout = async () => {
+    // Show confirmation popup
+    const confirmLogout = window.confirm("Are you sure you want to sign out?");
+    
+    if (!confirmLogout) {
+      return; // User cancelled the logout
+    }
+    
     try {
       await logoutUser();
       setShowAccountMenu(false);

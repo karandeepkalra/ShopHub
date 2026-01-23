@@ -5,19 +5,6 @@ import { registerUser } from '../firebase/config';
 import { Eye, EyeOff, Mail, Lock, User, UserPlus, Store, Package } from 'lucide-react';
 import VendorNotification from '../components/VendorNotification';
 
-const CATEGORIES = [
-  'Electronics',
-  'Fashion',
-  'Home & Garden',
-  'Sports & Outdoors',
-  'Books & Media',
-  'Toys & Games',
-  'Health & Beauty',
-  'Automotive',
-  'Food & Beverages',
-  'Other'
-];
-
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -26,8 +13,8 @@ const RegisterPage = () => {
     confirmPassword: '',
     role: 'user', // 'user' | 'vendor'
     businessName: '',
-    category: '',
-    description: ''
+    description: '',
+    agreeToTerms: false
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -40,9 +27,10 @@ const RegisterPage = () => {
   const navigate = useNavigate();
 
   const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: type === 'checkbox' ? checked : value
     });
   };
 
@@ -69,11 +57,13 @@ const RegisterPage = () => {
           setLoading(false);
           return;
         }
-        if (!formData.category) {
-          setError('Please select a business category');
-          setLoading(false);
-          return;
-        }
+      }
+
+      // Validate terms agreement
+      if (!formData.agreeToTerms) {
+        setError('You must agree to the Terms and Conditions and Privacy Policy');
+        setLoading(false);
+        return;
       }
 
       // Use Firebase authentication
@@ -82,7 +72,6 @@ const RegisterPage = () => {
         email: formData.email,
         role: formData.role,
         businessName: formData.businessName,
-        category: formData.category,
         description: formData.description,
         vendorStatus: formData.role === 'vendor' ? 'pending' : null
       });
@@ -270,24 +259,6 @@ const RegisterPage = () => {
                   />
                 </div>
 
-                <div>
-                  <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-                    Product Category <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="category"
-                    name="category"
-                    required={formData.role === 'vendor'}
-                    className="appearance-none relative block w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm"
-                    value={formData.category}
-                    onChange={handleChange}
-                  >
-                    <option value="">Select a category</option>
-                    {CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
 
                 <div>
                   <label htmlFor="description" className="block text-sm font-medium text-gray-700">
@@ -376,20 +347,22 @@ const RegisterPage = () => {
           <div className="flex items-center">
             <input
               id="agree-terms"
-              name="agree-terms"
+              name="agreeToTerms"
               type="checkbox"
+              checked={formData.agreeToTerms}
+              onChange={handleChange}
               required
               className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
             />
             <label htmlFor="agree-terms" className="ml-2 block text-sm text-gray-900">
               I agree to{' '}
-              <a href="#" className="text-teal-600 hover:text-teal-500">
+              <Link to="/terms" className="text-teal-600 hover:text-teal-500" target="_blank">
                 Terms and Conditions
-              </a>{' '}
+              </Link>{' '}
               and{' '}
-              <a href="#" className="text-teal-600 hover:text-teal-500">
+              <Link to="/privacy" className="text-teal-600 hover:text-teal-500" target="_blank">
                 Privacy Policy
-              </a>
+              </Link>
               {formData.role === 'vendor' && (
                 <span className="block text-xs text-orange-600 mt-1">
                   Vendor accounts require admin approval before you can add products.
