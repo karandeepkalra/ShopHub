@@ -1174,14 +1174,13 @@ export const updatePassword = async (userId, newPassword) => {
       return { success: false, error: "Password must be at least 6 characters long" };
     }
     
-    const { auth, updatePassword: updateFirebasePassword } = await import('firebase/auth');
+    const { updatePassword: updateFirebasePassword } = await import('firebase/auth');
     const { doc, updateDoc } = await import('firebase/firestore');
-    const { db } = await import('./config');
     
-    // Get current user
+    // Get the current user from the existing auth instance
     const user = auth.currentUser;
     if (!user) {
-      return { success: false, error: "User not authenticated" };
+      return { success: false, error: "User not authenticated. Please sign in again." };
     }
     
     // Update password in Firebase Auth
