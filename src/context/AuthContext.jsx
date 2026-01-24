@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth } from '../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
+import { useCurrency } from './CurrencyContext';
 
 const AuthContext = createContext();
 
@@ -18,10 +19,10 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState(null); // 'user' | 'vendor' | 'admin'
   const [vendorStatus, setVendorStatus] = useState(null); // 'pending' | 'approved' | 'rejected'
+  const { setSelectedCountry } = useCurrency();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      console.log('Auth state changed:', firebaseUser);
       if (firebaseUser) {
         // User is signed in - fetch user data from Firestore to get role
         const fetchUserData = async () => {
@@ -42,8 +43,12 @@ export const AuthProvider = ({ children }) => {
             setIsAuthenticated(true);
             setUserRole(userData.role || 'user');
             setVendorStatus(userData.vendorStatus || null);
+            
+            // Set user's country as default location
+            if (userData.country) {
+              setSelectedCountry(userData.country);
+            }
           } catch (error) {
-            console.error('Error fetching user data:', error);
             setUser({
               uid: firebaseUser.uid,
               email: firebaseUser.email,
@@ -63,17 +68,17 @@ export const AuthProvider = ({ children }) => {
         setIsAuthenticated(false);
         setUserRole(null);
         setVendorStatus(null);
+        // Reset to default country when user signs out
+        setSelectedCountry('India');
         setLoading(false);
       }
     }, (error) => {
-      console.error('Auth error:', error);
       setLoading(false);
     });
 
     // Fallback timeout in case Firebase takes too long
     const timeout = setTimeout(() => {
       if (loading) {
-        console.log('Firebase auth taking too long, proceeding anyway');
         setLoading(false);
       }
     }, 3000);

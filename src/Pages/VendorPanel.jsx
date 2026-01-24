@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Save, X, Package, Tag, DollarSign, Image, FileText, Store, Clock, Check, AlertCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Package, Tag, DollarSign, Image, FileText, Store, Clock, Check, AlertCircle, MapPin } from 'lucide-react';
 import { db } from '../firebase/config';
 import { collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, where, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
+import { useCurrency } from '../context/CurrencyContext';
 
 const VendorPanel = () => {
   console.log('VendorPanel component is being rendered!');
   
   const { user, vendorStatus, userRole } = useAuth();
+  const { selectedCountry, currencySymbol, formatPrice } = useCurrency();
   const [products, setProducts] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -42,13 +44,16 @@ const VendorPanel = () => {
   console.log('VendorPanel - About to render, loading:', loading);
 
   const categories = [
-    'Electronics', 'Fashion', 'Home', 'Beauty & Personal Care',
-    'Sports & Outdoors', 'Books', 'Toys & Games', 'Automotive', 'Grocery'
+    { value: 'men', label: 'Men\'s Clothing' },
+    { value: 'women', label: 'Women\'s Clothing' },
+    { value: 'kids', label: 'Kids\'s Clothing' },
+    { value: 'accessories', label: 'Accessories' }
   ];
 
   const [formData, setFormData] = useState({
     name: '',
     price: '',
+    originalPrice: '',
     category: '',
     description: '',
     image: '',
@@ -120,11 +125,24 @@ const VendorPanel = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Get current user's currency for consistent pricing
+    const userCurrency = selectedCountry === 'United States' ? 'USD' :
+                        selectedCountry === 'United Kingdom' ? 'GBP' :
+                        selectedCountry === 'Canada' ? 'CAD' :
+                        selectedCountry === 'Australia' ? 'AUD' :
+                        selectedCountry === 'United Arab Emirates' ? 'AED' :
+                        selectedCountry === 'Singapore' ? 'SGD' :
+                        selectedCountry === 'Malaysia' ? 'MYR' :
+                        selectedCountry === 'Saudi Arabia' ? 'SAR' :
+                        selectedCountry === 'India' ? 'INR' : 'INR';
+    
     const data = {
       ...formData,
       price: Number(formData.price),
+      originalPrice: Number(formData.originalPrice) || Number(formData.price),
       stock: Number(formData.stock),
       rating: Number(formData.rating),
+      currency: userCurrency, // Save in user's local currency
       vendorEmail: user.email,
       vendorName: vendorInfo?.businessName || user.displayName,
       createdAt: new Date().toISOString()
@@ -159,6 +177,7 @@ const VendorPanel = () => {
     setFormData({
       name: '',
       price: '',
+      originalPrice: '',
       category: '',
       description: '',
       image: '',
@@ -226,6 +245,10 @@ const VendorPanel = () => {
               </p>
               <div className="flex items-center gap-4 mt-2">
                 <span className="text-sm text-gray-500">Email: {user?.email}</span>
+                <span className="text-sm text-gray-500 flex items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  {selectedCountry} ({currencySymbol})
+                </span>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   isApproved 
                     ? 'bg-green-100 text-green-800' 
@@ -241,7 +264,7 @@ const VendorPanel = () => {
               onClick={() => setShowAddForm(true)}
               className={`px-4 py-2 rounded-lg flex gap-2 transition-colors ${
                 isApproved 
-                  ? 'bg-emerald-600 text-white hover:bg-emerald-700' 
+                  ? 'bg-blue-600 text-white hover:bg-blue-700' 
                   : 'bg-yellow-600 text-white hover:bg-yellow-700'
               }`}
             >
@@ -292,9 +315,9 @@ const VendorPanel = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Products</p>
-                <p className="text-2xl font-bold text-emerald-600">{products.length}</p>
+                <p className="text-2xl font-bold text-blue-600">{products.length}</p>
               </div>
-              <Package className="h-8 w-8 text-emerald-500" />
+              <Package className="h-8 w-8 text-blue-500" />
             </div>
           </div>
           
@@ -342,6 +365,12 @@ const VendorPanel = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                <p className="text-sm text-blue-800">
+                  <strong>Pricing Information:</strong> Enter prices in your local currency ({currencySymbol} - {selectedCountry}). 
+                  Products will be displayed to customers in their own local currency with automatic conversion.
+                </p>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -361,7 +390,7 @@ const VendorPanel = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     <DollarSign className="inline w-4 h-4 mr-1" />
-                    Price
+                    Sale Price ({currencySymbol})
                   </label>
                   <input
                     type="number"
@@ -370,8 +399,36 @@ const VendorPanel = () => {
                     onChange={handleInputChange}
                     step="0.01"
                     required
+                    placeholder={`Enter price in ${currencySymbol}`}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Price customers will pay in your local currency ({selectedCountry})
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <DollarSign className="inline w-4 h-4 mr-1" />
+                    Original Price ({currencySymbol})
+                  </label>
+                  <input
+                    type="number"
+                    name="originalPrice"
+                    value={formData.originalPrice}
+                    onChange={handleInputChange}
+                    step="0.01"
+                    placeholder={`Leave empty if no discount`}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Original price before discount in your local currency
+                  </p>
+                  {formData.price && formData.originalPrice && Number(formData.originalPrice) > Number(formData.price) && (
+                    <p className="text-xs text-green-600 mt-1">
+                      Discount: {Math.round((1 - Number(formData.price) / Number(formData.originalPrice)) * 100)}% OFF
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -384,11 +441,11 @@ const VendorPanel = () => {
                     value={formData.category}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Select a category</option>
                     {categories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
+                      <option key={cat.value} value={cat.value}>{cat.label}</option>
                     ))}
                   </select>
                 </div>
@@ -475,7 +532,7 @@ const VendorPanel = () => {
               <div className="flex gap-3">
                 <button
                   type="submit"
-                  className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors"
+                  className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   <Save size={20} />
                   {editingProduct ? 'Update Product' : 'Add Product'}
@@ -534,7 +591,19 @@ const VendorPanel = () => {
                         </div>
                       </td>
                       <td className="py-3 px-4 text-gray-600">{product.category}</td>
-                      <td className="py-3 px-4 text-gray-900">${product.price}</td>
+                      <td className="py-3 px-4">
+                        <div>
+                          <div className="font-medium text-gray-900">{currencySymbol}{Number(product.price).toLocaleString()}</div>
+                          {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
+                            <div className="flex items-center gap-1">
+                              <span className="text-sm text-gray-500 line-through">{currencySymbol}{Number(product.originalPrice).toLocaleString()}</span>
+                              <span className="text-xs font-medium text-green-600">
+                                {Math.round((1 - Number(product.price) / Number(product.originalPrice)) * 100)}% OFF
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </td>
                       <td className="py-3 px-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                           product.stock > 10 ? 'bg-green-100 text-green-800' : 
@@ -622,7 +691,7 @@ const VendorPanel = () => {
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowPendingPopup(false)}
-                  className="flex-1 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors"
+                  className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   I Understand
                 </button>

@@ -54,7 +54,7 @@ export const Navbar = ({ isMobileMenuOpen, setIsMobileMenuOpen }) => {
   return (
     <>
       {/* Desktop Navbar */}
-      <div className="fixed top-[64px] lg:top-[88px] left-0 right-0 z-40 bg-white border-b border-gray-100 shadow-sm hidden lg:block">
+      <div className="fixed top-[64px] lg:top-[88px] left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-b border-gray-100/50 shadow-sm hidden lg:block">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 lg:h-16">
             <div className="flex items-center gap-8">
@@ -62,7 +62,7 @@ export const Navbar = ({ isMobileMenuOpen, setIsMobileMenuOpen }) => {
               <div className="relative">
                 <button
                   onClick={() => setActiveMenu(activeMenu === "categories" ? null : "categories")}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-all font-semibold text-sm shadow-lg shadow-emerald-100"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-semibold text-sm shadow-lg shadow-blue-100 hover:shadow-xl hover:scale-105"
                 >
                   <Menu className="w-4 h-4" />
                   Browse All Categories
@@ -71,16 +71,16 @@ export const Navbar = ({ isMobileMenuOpen, setIsMobileMenuOpen }) => {
 
                 {activeMenu === "categories" && (
                   <ClickAwayListener onClickAway={() => setActiveMenu(null)}>
-                    <div className="absolute top-full left-0 mt-3 w-72 bg-white rounded-2xl shadow-2xl border border-gray-50 z-50 py-2 animate-in fade-in slide-in-from-top-2">
+                    <div className="absolute top-full left-0 mt-3 w-72 bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-100/50 z-50 py-2 animate-in fade-in slide-in-from-top-2">
                       <ul className="py-1">
                         {categories.map((c, i) => (
                           <li key={i}>
                             <Link
                               to={c.path}
                               onClick={() => setActiveMenu(null)}
-                              className="px-5 py-2.5 flex items-center gap-4 hover:bg-emerald-50 hover:text-emerald-700 text-sm font-medium text-gray-700 transition-colors"
+                              className="px-5 py-2.5 flex items-center gap-4 hover:bg-blue-50 hover:text-blue-700 text-sm font-medium text-gray-700 transition-all duration-200 group"
                             >
-                              <span className="text-lg">{c.icon}</span>
+                              <span className="text-lg group-hover:scale-110 transition-transform duration-200">{c.icon}</span>
                               {c.name}
                             </Link>
                           </li>
@@ -99,8 +99,11 @@ export const Navbar = ({ isMobileMenuOpen, setIsMobileMenuOpen }) => {
                       to={link.hasDropdown ? "#" : link.path}
                       onMouseEnter={() => link.hasDropdown && setActiveMenu(link.name)}
                       onClick={(e) => link.hasDropdown && e.preventDefault()}
-                      className={`flex items-center gap-1.5 py-2 text-sm font-bold transition-all ${isActive(link.path) ? "text-emerald-600" : "text-gray-700 hover:text-emerald-600"
-                        }`}
+                      className={`flex items-center gap-1.5 py-2 text-sm font-bold transition-all duration-200 hover:scale-105 ${
+                        isActive(link.path)
+                          ? "text-blue-600"
+                          : "text-gray-700 hover:text-blue-600"
+                      }`}
                     >
                       {link.name}
                       {link.hasDropdown && <ChevronDown className="w-3.5 h-3.5 opacity-50" />}
@@ -110,11 +113,11 @@ export const Navbar = ({ isMobileMenuOpen, setIsMobileMenuOpen }) => {
                     {link.isMegaMenu && activeMenu === link.name && (
                       <div className="absolute top-full left-0 mt-0 pt-3 z-50">
                         <ClickAwayListener onClickAway={() => setActiveMenu(null)}>
-                          <div className="w-[800px] bg-white rounded-2xl shadow-2xl border border-gray-50 p-8 grid grid-cols-3 gap-10 animate-in fade-in slide-in-from-top-2">
+                          <div className="w-[800px] bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-100/50 p-8 grid grid-cols-3 gap-10 animate-in fade-in slide-in-from-top-2">
                             {megaMenuCategories.map((cat, idx) => (
                               <div key={idx}>
-                                <h3 className="font-extrabold text-gray-900 mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                <h3 className="font-extrabold text-gray-900 mb-4 border-b border-gray-100/50 pb-2 flex items-center gap-2">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                                   {cat.title}
                                 </h3>
                                 <ul className="space-y-3">
@@ -122,7 +125,7 @@ export const Navbar = ({ isMobileMenuOpen, setIsMobileMenuOpen }) => {
                                     <li key={i}>
                                       <Link
                                         to={`/category/${item.toLowerCase().replace(/\s+/g, "-")}`}
-                                        className="text-[13px] font-medium text-gray-500 hover:text-emerald-600 transition-colors"
+                                        className="text-[13px] font-medium text-gray-500 hover:text-blue-600 transition-all duration-200 hover:translate-x-1"
                                         onClick={() => setActiveMenu(null)}
                                       >
                                         {item}
@@ -142,11 +145,11 @@ export const Navbar = ({ isMobileMenuOpen, setIsMobileMenuOpen }) => {
             </div>
 
             {/* Support */}
-            <div className="flex items-center gap-4 py-2 px-4 bg-emerald-50 rounded-full border border-emerald-100">
-              <Phone className="w-4 h-4 text-emerald-600" />
+            <div className="flex items-center gap-4 py-2 px-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-full border border-blue-100/50 hover:shadow-lg transition-all duration-200 hover:scale-105">
+              <Phone className="w-4 h-4 text-blue-600" />
               <div>
-                <div className="text-sm font-bold text-emerald-700 leading-none">1900 - 888</div>
-                <div className="text-[10px] text-emerald-600 uppercase font-semibold mt-0.5">Support 24/7</div>
+                <div className="text-sm font-bold text-blue-700 leading-none">1900 - 888</div>
+                <div className="text-[10px] text-blue-600 uppercase font-semibold mt-0.5">Support 24/7</div>
               </div>
             </div>
           </div>
@@ -162,13 +165,13 @@ export const Navbar = ({ isMobileMenuOpen, setIsMobileMenuOpen }) => {
         />
 
         {/* Drawer Content */}
-        <div className={`absolute top-0 left-0 bottom-0 w-[280px] bg-white shadow-2xl transition-transform duration-300 transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className={`absolute top-0 left-0 bottom-0 w-[280px] bg-white/95 backdrop-blur-lg shadow-2xl transition-transform duration-300 transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           <div className="flex flex-col h-full">
-            <div className="p-5 border-b border-gray-100 flex items-center justify-between">
-              <div className="h-8 w-32 bg-emerald-600 rounded-lg flex items-center justify-center">
+            <div className="p-5 border-b border-gray-100/50 flex items-center justify-between">
+              <div className="h-8 w-32 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold italic">ShopHub</span>
               </div>
-              <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 hover:bg-gray-100 rounded-full">
+              <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors hover:scale-110">
                 <X size={20} className="text-gray-500" />
               </button>
             </div>
@@ -179,8 +182,11 @@ export const Navbar = ({ isMobileMenuOpen, setIsMobileMenuOpen }) => {
                   <Link
                     key={i}
                     to={link.path}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${isActive(link.path) ? 'bg-emerald-50 text-emerald-700' : 'text-gray-600 hover:bg-gray-50'
-                      }`}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105 ${
+                      isActive(link.path) 
+                        ? 'bg-blue-50 text-blue-700' 
+                        : 'text-gray-600 hover:bg-gray-50'
+                    }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {link.name}
@@ -195,10 +201,10 @@ export const Navbar = ({ isMobileMenuOpen, setIsMobileMenuOpen }) => {
                     <Link
                       key={i}
                       to={c.path}
-                      className="flex items-center gap-3 py-2 text-sm font-medium text-gray-600 hover:text-emerald-600"
+                      className="flex items-center gap-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 transition-all duration-200 hover:translate-x-1"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      <span>{c.icon}</span>
+                      <span className="hover:scale-110 transition-transform duration-200">{c.icon}</span>
                       {c.name}
                     </Link>
                   ))}
@@ -206,10 +212,10 @@ export const Navbar = ({ isMobileMenuOpen, setIsMobileMenuOpen }) => {
               </div>
             </div>
 
-            <div className="p-6 border-t border-gray-100 bg-gray-50">
+            <div className="p-6 border-t border-gray-100/50 bg-gradient-to-r from-blue-50 to-indigo-50">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                  <Phone size={18} className="text-emerald-600" />
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                  <Phone size={18} className="text-blue-600" />
                 </div>
                 <div>
                   <p className="text-sm font-bold text-gray-900">1900 - 888</p>
