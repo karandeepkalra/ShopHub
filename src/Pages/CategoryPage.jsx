@@ -193,7 +193,7 @@ const CategoryPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-slate-900 py-8">
       <div className="w-full mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar Filters */}
@@ -213,10 +213,10 @@ const CategoryPage = () => {
           {/* Products Grid */}
           <div className="lg:col-span-3">
             <div className="mb-6">
-              <h1 className="text-3xl font-bold text-gray-800 capitalize">
+              <h1 className="text-3xl font-bold text-gray-100 capitalize">
                 {category ? category.replace('-', ' & ') : 'All Products'}
               </h1>
-              <p className="text-gray-600 mt-2">
+              <p className="text-gray-400 mt-2">
                 Showing {displayProducts.length} of {filteredProducts.length} products
               </p>
             </div>
@@ -227,14 +227,14 @@ const CategoryPage = () => {
               <div className="relative" ref={showDropdownRef}>
                 <button
                   onClick={() => setShowDropdownOpen(!showDropdownOpen)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                  className="flex items-center gap-2 px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg hover:bg-slate-700 transition"
                 >
-                  <span className="text-gray-700">Show : {showCount === Infinity ? "All" : showCount}</span>
-                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                  <span className="text-gray-300">Show : {showCount === Infinity ? "All" : showCount}</span>
+                  <ChevronDown className="w-4 h-4 text-gray-400" />
                 </button>
                 
                 {showDropdownOpen && (
-                  <div className="absolute z-50 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg">
+                  <div className="absolute z-50 mt-2 w-full bg-slate-800 border border-slate-600 rounded-lg shadow-lg">
                     {showOptions.map((option) => (
                       <button
                         key={option}
@@ -242,7 +242,7 @@ const CategoryPage = () => {
                           setShowCount(option === "All" ? Infinity : option);
                           setShowDropdownOpen(false);
                         }}
-                        className="w-full px-4 py-2 text-left hover:bg-gray-50 transition first:rounded-t-lg last:rounded-b-lg"
+                        className="w-full px-4 py-2 text-left hover:bg-slate-700 transition first:rounded-t-lg last:rounded-b-lg text-gray-300"
                       >
                         {option}
                       </button>
@@ -255,16 +255,16 @@ const CategoryPage = () => {
               <div className="relative" ref={sortDropdownRef}>
                 <button
                   onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                  className="flex items-center gap-2 px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg hover:bg-slate-700 transition"
                 >
-                  <span className="text-gray-700">
+                  <span className="text-gray-300">
                     Sort By: {sortOptions.find(opt => opt.value === sortBy)?.label}
                   </span>
-                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                  <ChevronDown className="w-4 h-4 text-gray-400" />
                 </button>
                 
                 {sortDropdownOpen && (
-                  <div className="absolute z-10 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg">
+                  <div className="absolute z-10 mt-2 w-full bg-slate-800 border border-slate-600 rounded-lg shadow-lg">
                     {sortOptions.map((option) => (
                       <button
                         key={option.value}
@@ -272,8 +272,8 @@ const CategoryPage = () => {
                           setSortBy(option.value);
                           setSortDropdownOpen(false);
                         }}
-                        className={`w-full px-4 py-2 text-left hover:bg-gray-50 transition first:rounded-t-lg last:rounded-b-lg ${
-                          sortBy === option.value ? "bg-green-50 text-green-700" : ""
+                        className={`w-full px-4 py-2 text-left hover:bg-slate-700 transition first:rounded-t-lg last:rounded-b-lg text-gray-300 ${
+                          sortBy === option.value ? "bg-blue-900/50 text-blue-400" : ""
                         }`}
                       >
                         {option.label}
@@ -287,7 +287,7 @@ const CategoryPage = () => {
             {/* Products Grid */}
             {loading ? (
               <div className="flex justify-center items-center py-12">
-                <div className="text-lg text-gray-600">Loading products...</div>
+                <div className="text-lg text-gray-400">Loading products...</div>
               </div>
             ) : (
               <>

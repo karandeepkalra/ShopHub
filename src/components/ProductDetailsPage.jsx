@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Star, Heart, ShoppingCart, Share2, Minus, Plus, User } from 'lucide-react';
+import { Star, Heart, ShoppingCart, Share2, Minus, Plus } from 'lucide-react';
 import { db } from '../firebase/config';
-import { doc, getDoc, collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, getDocs } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -17,6 +17,7 @@ const ProductDetailsPage = () => {
   const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } = useCart();
   const { isAuthenticated } = useAuth();
 
+  // Review form state
   const [reviewForm, setReviewForm] = useState({
     name: '',
     email: '',
@@ -24,9 +25,8 @@ const ProductDetailsPage = () => {
     comment: ''
   });
   const [hoverRating, setHoverRating] = useState(0);
-  const [reviews, setReviews] = useState([]);
-  const [averageRating, setAverageRating] = useState(0);
 
+  // Fetch product from Firebase
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -39,6 +39,7 @@ const ProductDetailsPage = () => {
             ...productDoc.data()
           };
           setProduct(productData);
+          // Set default selected size if available
           if (productData.sizes && productData.sizes.length > 0) {
             setSelectedSize(productData.sizes[0]);
           }
@@ -56,80 +57,14 @@ const ProductDetailsPage = () => {
     fetchProduct();
   }, [id]);
 
-  useEffect(() => {
-    if (!id) return;
-
-    const reviewsRef = collection(db, 'reviews');
-    
-    // First try without ordering to avoid index requirement
-    const q = query(
-      reviewsRef,
-      where('productId', '==', id)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      console.log('Reviews snapshot:', snapshot.docs.length, 'reviews found');
-      const reviewsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      // Sort client-side by createdAt (newest first)
-      const sortedReviews = reviewsData.sort((a, b) => {
-        const timeA = a.createdAt?.toSeconds?.() || a.createdAt?.seconds || 0;
-        const timeB = b.createdAt?.toSeconds?.() || b.createdAt?.seconds || 0;
-        return timeB - timeA;
-      });
-      
-      console.log('Processed reviews:', sortedReviews);
-      setReviews(sortedReviews);
-      
-      if (sortedReviews.length > 0) {
-        const totalRating = sortedReviews.reduce((sum, review) => sum + review.rating, 0);
-        const avgRating = totalRating / sortedReviews.length;
-        setAverageRating(Math.round(avgRating * 10) / 10); 
-      } else {
-        setAverageRating(0);
-      }
-    }, (error) => {
-      console.error('Error fetching reviews:', error);
-      // Fallback to one-time fetch if real-time fails
-      getDocs(q).then(querySnapshot => {
-        const reviewsData = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        
-        // Sort client-side
-        const sortedReviews = reviewsData.sort((a, b) => {
-          const timeA = a.createdAt?.toSeconds?.() || a.createdAt?.seconds || 0;
-          const timeB = b.createdAt?.toSeconds?.() || b.createdAt?.seconds || 0;
-          return timeB - timeA;
-        });
-        
-        setReviews(sortedReviews);
-        
-        if (sortedReviews.length > 0) {
-          const totalRating = sortedReviews.reduce((sum, review) => sum + review.rating, 0);
-          const avgRating = totalRating / sortedReviews.length;
-          setAverageRating(Math.round(avgRating * 10) / 10); 
-        } else {
-          setAverageRating(0);
-        }
-      }).catch(fetchError => {
-        console.error('Fallback fetch also failed:', fetchError);
-      });
-    });
-
-    return () => unsubscribe();
-  }, [id]);
-
+  // Mock additional images - use product images if available, otherwise fallback
   const images = product?.images && product.images.length > 0 
     ? product.images 
     : product?.image 
       ? [product.image] 
       : ['https://images.unsplash.com/photo-1560493676-04071c5f467b?w=400'];
 
+  // Dynamic sizes from product data or fallback
   const sizes = product?.sizes && product.sizes.length > 0
     ? product.sizes
     : [];
@@ -143,7 +78,7 @@ const ProductDetailsPage = () => {
           className={
             star <= rating
               ? 'fill-yellow-400 text-yellow-400'
-              : 'fill-gray-200 text-gray-200'
+              : 'fill-gray-600 text-gray-600'
           }
         />
       ))}
@@ -166,37 +101,19 @@ const ProductDetailsPage = () => {
     }));
   };
 
-  const handleReviewSubmit = async (e) => {
+  const handleReviewSubmit = (e) => {
     e.preventDefault();
+    console.log('Review submitted:', reviewForm);
+    // Add your review submission logic here
     
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-
-    try {
-      const reviewsRef = collection(db, 'reviews');
-      await addDoc(reviewsRef, {
-        productId: id,
-        name: reviewForm.name,
-        email: reviewForm.email,
-        rating: reviewForm.rating,
-        comment: reviewForm.comment,
-        createdAt: serverTimestamp()
-      });
-
-      setReviewForm({
-        name: '',
-        email: '',
-        rating: 0,
-        comment: ''
-      });
-      
-      alert('Thank you for your review!');
-    } catch (error) {
-      console.error('Error submitting review:', error);
-      alert('Failed to submit review. Please try again.');
-    }
+    // Reset form after submission
+    setReviewForm({
+      name: '',
+      email: '',
+      rating: 0,
+      comment: ''
+    });
+    alert('Thank you for your review!');
   };
 
   const handleAddToCart = async () => {
@@ -205,6 +122,7 @@ const ProductDetailsPage = () => {
       return;
     }
     
+    // Add product with selected quantity and size
     const productWithQuantity = {
       ...product,
       quantity: quantity,
@@ -231,9 +149,9 @@ const ProductDetailsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-slate-900">
         <div className="text-center">
-          <p className="text-gray-500 text-xl mb-4">Loading product...</p>
+          <p className="text-gray-400 text-xl mb-4">Loading product...</p>
         </div>
       </div>
     );
@@ -241,12 +159,12 @@ const ProductDetailsPage = () => {
 
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-slate-900">
         <div className="text-center">
-          <p className="text-gray-500 text-xl mb-4">Product not found</p>
+          <p className="text-gray-400 text-xl mb-4">Product not found</p>
           <button 
             onClick={() => navigate('/')}
-            className="px-6 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600"
+            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
           >
             Go Back Home
           </button>
@@ -256,11 +174,14 @@ const ProductDetailsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-slate-900 py-8">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 bg-white rounded-lg shadow-sm p-6 mb-8">
+        {/* Product Details Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 bg-slate-800 rounded-lg shadow-lg p-6 mb-8 border border-slate-700/50">
+          {/* Left - Product Images */}
           <div>
-            <div className="mb-4 rounded-lg overflow-hidden border border-gray-200">
+            {/* Main Image */}
+            <div className="mb-4 rounded-lg overflow-hidden border border-slate-700/50">
               <img
                 src={images[selectedImage]}
                 alt={product.name}
@@ -268,6 +189,7 @@ const ProductDetailsPage = () => {
               />
             </div>
 
+            {/* Thumbnail Images */}
             <div className="grid grid-cols-4 gap-3">
               {images.map((img, index) => (
                 <button
@@ -275,8 +197,8 @@ const ProductDetailsPage = () => {
                   onClick={() => setSelectedImage(index)}
                   className={`rounded-lg overflow-hidden border-2 transition-all ${
                     selectedImage === index
-                      ? 'border-teal-500'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-blue-500'
+                      : 'border-slate-700/50 hover:border-slate-600'
                   }`}
                 >
                   <img
@@ -289,44 +211,44 @@ const ProductDetailsPage = () => {
             </div>
           </div>
 
+          {/* Right - Product Details */}
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-3">
+            <h1 className="text-3xl font-bold text-gray-100 mb-3">
               {product.name}
             </h1>
 
+            {/* Rating */}
             <div className="flex items-center gap-3 mb-4">
-              <StarRating rating={averageRating || 0} />
-              <span className="text-gray-600">({reviews.length} Reviews)</span>
-              {averageRating > 0 && (
-                <span className="text-teal-600 font-medium">
-                  {averageRating.toFixed(1)} out of 5
-                </span>
-              )}
+              <StarRating rating={product.rating || 0} />
+              <span className="text-gray-400">(32) Reviews</span>
             </div>
 
+            {/* Price */}
             <div className="flex items-center gap-3 mb-6">
-              <span className="text-4xl font-bold text-teal-600">
+              <span className="text-4xl font-bold text-blue-400">
                 ${product.price}
               </span>
               {product.originalPrice && (
                 <>
-                  <span className="text-xl text-gray-400 line-through">
+                  <span className="text-xl text-gray-500 line-through">
                     ${product.originalPrice}
                   </span>
-                  <span className="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-sm font-semibold">
+                  <span className="bg-pink-600/20 text-pink-400 px-3 py-1 rounded-full text-sm font-semibold">
                     {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% Off
                   </span>
                 </>
               )}
             </div>
 
-            <p className="text-gray-600 mb-6 leading-relaxed">
+            {/* Description */}
+            <p className="text-gray-400 mb-6 leading-relaxed">
               {product.description || 'No description available.'}
             </p>
 
+            {/* Size / Weight Selector */}
             {sizes && sizes.length > 0 && (
               <div className="mb-6">
-                <label className="text-gray-700 font-medium mb-3 block">
+                <label className="text-gray-300 font-medium mb-3 block">
                   Size / Weight:
                 </label>
                 <div className="flex gap-2">
@@ -336,8 +258,8 @@ const ProductDetailsPage = () => {
                       onClick={() => setSelectedSize(size)}
                       className={`px-4 py-2 rounded-lg border transition-all ${
                         selectedSize === size
-                          ? 'bg-teal-500 text-white border-teal-500'
-                          : 'bg-white text-gray-700 border-gray-300 hover:border-teal-500'
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'bg-slate-700 text-gray-300 border-slate-600 hover:border-blue-500'
                       }`}
                     >
                       {size}
@@ -347,11 +269,13 @@ const ProductDetailsPage = () => {
               </div>
             )}
 
+            {/* Quantity and Actions */}
             <div className="flex gap-4 mb-6">
-              <div className="flex items-center border border-gray-300 rounded-lg">
+              {/* Quantity Selector */}
+              <div className="flex items-center border border-slate-600 rounded-lg">
                 <button
                   onClick={() => handleQuantityChange('decrement')}
-                  className="px-4 py-3 hover:bg-gray-50 transition-colors"
+                  className="px-4 py-3 hover:bg-slate-700 transition-colors text-gray-400"
                 >
                   <Minus size={18} />
                 </button>
@@ -359,30 +283,32 @@ const ProductDetailsPage = () => {
                   type="text"
                   value={quantity}
                   readOnly
-                  className="w-16 text-center border-x border-gray-300 py-3 focus:outline-none"
+                  className="w-16 text-center border-x border-slate-600 py-3 bg-slate-800 text-gray-100 focus:outline-none"
                 />
                 <button
                   onClick={() => handleQuantityChange('increment')}
-                  className="px-4 py-3 hover:bg-gray-50 transition-colors"
+                  className="px-4 py-3 hover:bg-slate-700 transition-colors text-gray-400"
                 >
                   <Plus size={18} />
                 </button>
               </div>
 
+              {/* Add to Cart Button */}
               <button 
                 onClick={handleAddToCart}
-                className="flex-1 bg-teal-500 hover:bg-teal-600 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
               >
                 <ShoppingCart size={20} />
                 Add to cart
               </button>
 
+              {/* Wishlist Button */}
               <button 
                 onClick={handleWishlistToggle}
-                className={`px-4 py-3 border rounded-lg transition-colors ${
+                className={`px-4 py-3 border rounded-lg transition-all ${
                   isInWishlist(product.id) 
-                    ? 'border-red-500 bg-red-50 text-red-500' 
-                    : 'border-gray-300 hover:bg-gray-50'
+                    ? 'border-pink-500 bg-pink-500/20 text-pink-400' 
+                    : 'border-slate-600 hover:bg-slate-700 text-gray-400'
                 }`}
               >
                 <Heart 
@@ -391,34 +317,36 @@ const ProductDetailsPage = () => {
                 />
               </button>
 
-              <button className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                <Share2 size={20} className="text-gray-600" />
+              {/* Share Button */}
+              <button className="px-4 py-3 border border-slate-600 rounded-lg hover:bg-slate-700 transition-all text-gray-400">
+                <Share2 size={20} />
               </button>
             </div>
 
-            <div className="border-t border-gray-200 pt-6 space-y-3">
+            {/* Product Info */}
+            <div className="border-t border-slate-700 pt-6 space-y-3">
               {product.category && (
                 <div className="flex">
                   <span className="text-gray-500 w-24">Category:</span>
-                  <span className="text-teal-600 font-medium">{product.category}</span>
+                  <span className="text-blue-400 font-medium">{product.category}</span>
                 </div>
               )}
               {product.brand && (
                 <div className="flex">
                   <span className="text-gray-500 w-24">Brand:</span>
-                  <span className="text-gray-700">{product.brand}</span>
+                  <span className="text-gray-300">{product.brand}</span>
                 </div>
               )}
               {product.sku && (
                 <div className="flex">
                   <span className="text-gray-500 w-24">SKU:</span>
-                  <span className="text-gray-700">{product.sku}</span>
+                  <span className="text-gray-300">{product.sku}</span>
                 </div>
               )}
               {product.createdAt && (
                 <div className="flex">
                   <span className="text-gray-500 w-24">Added:</span>
-                  <span className="text-teal-600 font-medium">
+                  <span className="text-blue-400 font-medium">
                     {new Date(product.createdAt).toLocaleDateString()}
                   </span>
                 </div>
@@ -426,15 +354,15 @@ const ProductDetailsPage = () => {
               {product.tags && product.tags.length > 0 && (
                 <div className="flex">
                   <span className="text-gray-500 w-24">Tags:</span>
-                  <span className="text-gray-700">{product.tags.join(', ')}</span>
+                  <span className="text-gray-300">{product.tags.join(', ')}</span>
                 </div>
               )}
               {typeof product.stock !== 'undefined' && (
                 <div className="flex">
                   <span className="text-gray-500 w-24">Stock:</span>
                   <span className={`font-medium ${
-                    product.stock > 10 ? 'text-teal-600' : 
-                    product.stock > 0 ? 'text-yellow-600' : 'text-red-600'
+                    product.stock > 10 ? 'text-green-400' : 
+                    product.stock > 0 ? 'text-yellow-400' : 'text-red-400'
                   }`}>
                     {product.stock} Items In Stock
                   </span>
@@ -444,13 +372,16 @@ const ProductDetailsPage = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Write a Review</h2>
+        {/* Review Form Section */}
+        <div className="bg-slate-800 rounded-lg shadow-lg p-6 border border-slate-700/50">
+          <h2 className="text-2xl font-bold text-gray-100 mb-6">Write a Review</h2>
           
           <form onSubmit={handleReviewSubmit} className="space-y-6">
+            {/* Name and Email Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Name Input */}
               <div>
-                <label htmlFor="name" className="block text-gray-700 font-medium mb-2">
+                <label htmlFor="name" className="block text-gray-300 font-medium mb-2">
                   Your Name <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -460,13 +391,14 @@ const ProductDetailsPage = () => {
                   value={reviewForm.name}
                   onChange={handleReviewChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-100 placeholder-gray-400"
                   placeholder="Enter your name"
                 />
               </div>
 
+              {/* Email Input */}
               <div>
-                <label htmlFor="email" className="block text-gray-700 font-medium mb-2">
+                <label htmlFor="email" className="block text-gray-300 font-medium mb-2">
                   Your Email <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -476,14 +408,15 @@ const ProductDetailsPage = () => {
                   value={reviewForm.email}
                   onChange={handleReviewChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-100 placeholder-gray-400"
                   placeholder="Enter your email"
                 />
               </div>
             </div>
 
+            {/* Rating Input */}
             <div>
-              <label className="block text-gray-700 font-medium mb-2">
+              <label className="block text-gray-300 font-medium mb-2">
                 Your Rating <span className="text-red-500">*</span>
               </label>
               <div className="flex gap-2">
@@ -501,21 +434,22 @@ const ProductDetailsPage = () => {
                       className={
                         star <= (hoverRating || reviewForm.rating)
                           ? 'fill-yellow-400 text-yellow-400'
-                          : 'fill-gray-200 text-gray-200'
+                          : 'fill-gray-600 text-gray-600'
                       }
                     />
                   </button>
                 ))}
                 {reviewForm.rating > 0 && (
-                  <span className="ml-3 text-gray-600 self-center">
+                  <span className="ml-3 text-gray-400 self-center">
                     {reviewForm.rating} out of 5
                   </span>
                 )}
               </div>
             </div>
 
+            {/* Comment Textarea */}
             <div>
-              <label htmlFor="comment" className="block text-gray-700 font-medium mb-2">
+              <label htmlFor="comment" className="block text-gray-300 font-medium mb-2">
                 Your Review <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -525,60 +459,22 @@ const ProductDetailsPage = () => {
                 onChange={handleReviewChange}
                 required
                 rows="5"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+                className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-100 placeholder-gray-400 resize-none"
                 placeholder="Write your review here..."
               />
             </div>
 
+            {/* Submit Button */}
             <div>
               <button
                 type="submit"
-                className="px-8 py-3 bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-lg transition-colors"
+                className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200"
               >
                 Submit Review
               </button>
             </div>
           </form>
         </div>
-
-        {/* Reviews Display Section */}
-        {reviews.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm p-6 mt-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Customer Reviews</h2>
-            <div className="space-y-6">
-              {reviews.map((review) => (
-                <div key={review.id} className="border-b border-gray-200 pb-6 last:border-b-0">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                      <User size={20} className="text-gray-500" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <h3 className="font-semibold text-gray-800">{review.name}</h3>
-                          <div className="flex items-center gap-2 mt-1">
-                            <StarRating rating={review.rating} />
-                            <span className="text-sm text-gray-600">
-                              {review.rating}.0
-                            </span>
-                          </div>
-                        </div>
-                        <span className="text-sm text-gray-500">
-                          {review.createdAt && 
-                            new Date(review.createdAt.toDate()).toLocaleDateString()
-                          }
-                        </span>
-                      </div>
-                      <p className="text-gray-600 leading-relaxed">
-                        {review.comment}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

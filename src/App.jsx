@@ -33,53 +33,53 @@ const HomePage = () => {
   const navigate = useNavigate();
   
   return (
-  <div className="bg-gray-100">
+  <div className="bg-slate-900">
     {/* Main Slider */}
-    <div className="bg-white shadow-sm mb-4">
+    <div className="bg-slate-800 shadow-lg mb-4">
       <Slider />
     </div>
     
     {/* Become a Vendor Banner */}
-    <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white py-8 sm:py-12 mb-4 relative overflow-hidden animate-fade-in-up">
+    <div className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-900 text-white py-8 sm:py-12 mb-4 relative overflow-hidden animate-fade-in-up">
       <div className="absolute inset-0 bg-black/20"></div>
       <div className="container mx-auto px-4 text-center relative z-10">
         <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 animate-bounce">Want to Sell on ShopHub?</h2>
         <p className="text-base sm:text-xl mb-6 opacity-90">Join thousands of sellers and grow your business</p>
         <button 
           onClick={() => navigate('/vendor-register')}
-          className="bg-white text-blue-600 px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 btn-hover"
+          className="bg-gradient-to-r from-blue-600 to-purple-600 text-gray-100 px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1"
         >
           Become a Vendor
         </button>
       </div>
-      <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-white/10 rounded-full animate-pulse-ring"></div>
-      <div className="absolute -top-4 -left-4 w-24 h-24 bg-white/10 rounded-full animate-pulse-ring" style={{animationDelay: '1s'}}></div>
+      <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-blue-600/10 rounded-full animate-pulse-ring"></div>
+      <div className="absolute -top-4 -left-4 w-24 h-24 bg-purple-600/10 rounded-full animate-pulse-ring" style={{animationDelay: '1s'}}></div>
     </div>
     
     {/* Deals of the Day */}
-    <div className="bg-white p-3 sm:p-4 mb-4 shadow-sm animate-fade-in-up">
+    <div className="bg-slate-800 p-3 sm:p-4 mb-4 shadow-lg animate-fade-in-up">
       <div className="container mx-auto">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-800">Deals of the Day</h2>
-          <button className="text-blue-600 font-medium hover:text-blue-700 transition-colors text-sm sm:text-base">VIEW ALL</button>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-100">Deals of the Day</h2>
+          <button className="text-blue-400 font-medium hover:text-blue-300 transition-colors text-sm sm:text-base">VIEW ALL</button>
         </div>
         <ProductCatalog category="men" limit={5} />
       </div>
     </div>
     
     {/* Top Categories */}
-    <div className="bg-white p-3 sm:p-4 mb-4 shadow-sm animate-fade-in-up" style={{animationDelay: '0.1s'}}>
+    <div className="bg-slate-800 p-3 sm:p-4 mb-4 shadow-lg animate-fade-in-up" style={{animationDelay: '0.1s'}}>
       <div className="container mx-auto">
-        <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">Top Categories</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-100 mb-4">Top Categories</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
           {['Men', 'Women', 'Kids', 'Footwear', 'Accessories', 'Watches'].map((category, index) => (
             <div 
               key={category} 
-              className="text-center p-3 sm:p-4 hover:shadow-lg cursor-pointer rounded-xl transition-all duration-300 hover:-translate-y-1 group"
+              className="text-center p-3 sm:p-4 hover:bg-slate-700 cursor-pointer rounded-xl transition-all duration-300 hover:-translate-y-1 group"
               onClick={() => navigate(`/category/${category.toLowerCase()}`)}
               style={{animationDelay: `${0.1 + index * 0.05}s`}}
             >
-              <div className="bg-gradient-to-br from-gray-100 to-gray-50 p-3 sm:p-4 rounded-full w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-2 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-3 sm:p-4 rounded-full w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-2 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 <span className="text-2xl sm:text-3xl">
                   {category === 'Men' ? '👔' : 
                    category === 'Women' ? '👗' : 
@@ -88,7 +88,7 @@ const HomePage = () => {
                    category === 'Accessories' ? '👜' : '⌚'}
                 </span>
               </div>
-              <span className="text-xs sm:text-sm text-gray-700 font-medium">{category}</span>
+              <span className="text-xs sm:text-sm text-gray-300 font-medium">{category}</span>
             </div>
           ))}
         </div>
@@ -96,20 +96,20 @@ const HomePage = () => {
     </div>
     
     {/* Trending Offers */}
-    <div className="bg-white p-3 sm:p-4 mb-4 shadow-sm animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+    <div className="bg-slate-800 p-3 sm:p-4 mb-4 shadow-lg animate-fade-in-up" style={{animationDelay: '0.2s'}}>
       <div className="container mx-auto">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-800">Trending Offers</h2>
-          <button className="text-blue-600 font-medium hover:text-blue-700 transition-colors text-sm sm:text-base">VIEW ALL</button>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-100">Trending Offers</h2>
+          <button className="text-blue-400 font-medium hover:text-blue-300 transition-colors text-sm sm:text-base">VIEW ALL</button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {[
-            { title: '50% OFF', desc: 'On top brands', color: 'from-red-500 to-pink-500' },
-            { title: 'Buy 1 Get 1', desc: 'Selected items', color: 'from-blue-500 to-indigo-500' },
-            { title: 'Min 60% Off', desc: 'Clearance sale', color: 'from-green-500 to-emerald-500' },
-            { title: 'Special Price', desc: 'Limited time', color: 'from-purple-500 to-violet-500' }
+            { title: '50% OFF', desc: 'On top brands', color: 'from-blue-600 to-purple-600' },
+            { title: 'Buy 1 Get 1', desc: 'Selected items', color: 'from-indigo-600 to-blue-600' },
+            { title: 'Min 60% Off', desc: 'Clearance sale', color: 'from-purple-600 to-blue-600' },
+            { title: 'Special Price', desc: 'Limited time', color: 'from-blue-500 to-indigo-500' }
           ].map((offer, index) => (
-            <div key={index} className={`bg-gradient-to-r ${offer.color} p-4 sm:p-6 rounded-xl text-white hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer`}>
+            <div key={index} className={`bg-gradient-to-r ${offer.color} p-4 sm:p-6 rounded-xl text-white hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer`} style={{animationDelay: `${0.2 + index * 0.05}s`}}>
               <h3 className="text-base sm:text-lg font-bold mb-2">{offer.title}</h3>
               <p className="text-xs sm:text-sm opacity-90 mb-3">{offer.desc}</p>
               <button className="bg-white text-gray-900 text-xs sm:text-sm font-medium px-3 py-1 rounded-lg hover:bg-gray-100 transition-colors">
@@ -122,11 +122,11 @@ const HomePage = () => {
     </div>
     
     {/* New Arrivals */}
-    <div className="bg-white p-3 sm:p-4 shadow-sm animate-fade-in-up" style={{animationDelay: '0.3s'}}>
+    <div className="bg-slate-800 p-3 sm:p-4 shadow-lg animate-fade-in-up" style={{animationDelay: '0.3s'}}>
       <div className="container mx-auto">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-800">New Arrivals</h2>
-          <button className="text-blue-600 font-medium hover:text-blue-700 transition-colors text-sm sm:text-base">VIEW ALL</button>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-100">New Arrivals</h2>
+          <button className="text-blue-400 font-medium hover:text-blue-300 transition-colors text-sm sm:text-base">VIEW ALL</button>
         </div>
         <ProductCatalog category="women" limit={4} />
       </div>

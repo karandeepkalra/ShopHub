@@ -117,35 +117,35 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-200 rounded-full opacity-20 animate-pulse" style={{animationDelay: '1s'}}></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-200 rounded-full opacity-10 animate-pulse" style={{animationDelay: '2s'}}></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-600/10 rounded-full opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-600/10 rounded-full opacity-20 animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/10 rounded-full opacity-10 animate-pulse" style={{animationDelay: '2s'}}></div>
       </div>
       
       <div className="max-w-2xl w-full relative z-10">
         {/* Logo/Icon */}
         <div className="text-center mb-8 animate-fade-in-up">
-          <div className="mx-auto h-16 w-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-xl mb-4 group-hover:scale-110 transition-transform duration-300">
+          <div className="mx-auto h-16 w-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 shadow-xl mb-4 group-hover:scale-110 transition-transform duration-300">
             <UserPlus className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Join ShopHub</h1>
-          <p className="text-gray-600">Create your account and start shopping</p>
+          <h1 className="text-3xl font-bold text-gray-100 mb-2">Join ShopHub</h1>
+          <p className="text-gray-400">Create your account and start shopping</p>
         </div>
         
         {/* Registration Form */}
-        <div className="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-8 border border-white/20 animate-slide-in-left">
+        <div className="bg-slate-800/80 backdrop-blur-md rounded-2xl shadow-xl p-8 border border-slate-700/50 animate-slide-in-left">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm animate-fade-in-up">
+              <div className="bg-red-900/50 border border-red-800/50 text-red-400 px-4 py-3 rounded-lg text-sm animate-fade-in-up">
                 {error}
               </div>
             )}
             
             {success && (
-              <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg text-sm animate-fade-in-up">
+              <div className="bg-green-900/50 border border-green-800/50 text-green-400 px-4 py-3 rounded-lg text-sm animate-fade-in-up">
                 {success}
               </div>
             )}
@@ -153,11 +153,11 @@ const RegisterPage = () => {
             <div className="space-y-5">
               {/* Role Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
+                <label className="block text-sm font-medium text-gray-300 mb-3">
                   Choose Account Type
                 </label>
                 <div className="grid grid-cols-2 gap-4">
-                  <label className="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50 group">
+                  <label className="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-slate-700 group">
                     <input
                       type="radio"
                       name="role"
@@ -168,8 +168,8 @@ const RegisterPage = () => {
                     />
                     <div className={`flex items-center w-full transition-all ${
                       formData.role === 'user' 
-                        ? 'text-blue-600 border-blue-500 bg-blue-50' 
-                        : 'text-gray-600 border-gray-200 hover:border-blue-300'
+                        ? 'text-blue-400 border-blue-500 bg-blue-900/30' 
+                        : 'text-gray-400 border-slate-600 hover:border-blue-500'
                     } p-3 rounded-lg border-2`}>
                       <User className="h-6 w-6 mr-3" />
                       <div>
@@ -179,7 +179,7 @@ const RegisterPage = () => {
                     </div>
                   </label>
                   
-                  <label className="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50 group">
+                  <label className="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-slate-700 group">
                     <input
                       type="radio"
                       name="role"
@@ -190,8 +190,8 @@ const RegisterPage = () => {
                     />
                     <div className={`flex items-center w-full transition-all ${
                       formData.role === 'vendor' 
-                        ? 'text-blue-600 border-blue-500 bg-blue-50' 
-                        : 'text-gray-600 border-gray-200 hover:border-blue-300'
+                        ? 'text-blue-400 border-blue-500 bg-blue-900/30' 
+                        : 'text-gray-400 border-slate-600 hover:border-blue-500'
                     } p-3 rounded-lg border-2`}>
                       <Store className="h-6 w-6 mr-3" />
                       <div>
@@ -206,12 +206,12 @@ const RegisterPage = () => {
               {/* Basic Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="group">
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
                     Full Name
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <User className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                      <User className="h-5 w-5 text-gray-400 group-focus-within:text-blue-400 transition-colors" />
                     </div>
                     <input
                       id="name"
@@ -219,7 +219,7 @@ const RegisterPage = () => {
                       type="text"
                       autoComplete="name"
                       required
-                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
+                      className="block w-full pl-10 pr-3 py-3 bg-slate-700 border border-slate-600 rounded-lg placeholder-gray-500 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-slate-500"
                       placeholder="Enter your full name"
                       value={formData.name}
                       onChange={handleChange}
@@ -228,18 +228,18 @@ const RegisterPage = () => {
                 </div>
                 
                 <div className="group">
-                  <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="country" className="block text-sm font-medium text-gray-300 mb-2">
                     Country / Region
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <MapPin className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                      <MapPin className="h-5 w-5 text-gray-400 group-focus-within:text-blue-400 transition-colors" />
                     </div>
                     <select
                       id="country"
                       name="country"
                       required
-                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400 appearance-none bg-white"
+                      className="block w-full pl-10 pr-3 py-3 bg-slate-700 border border-slate-600 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-slate-500 appearance-none"
                       value={formData.country}
                       onChange={handleChange}
                     >
@@ -264,12 +264,12 @@ const RegisterPage = () => {
               </div>
               
               <div className="group">
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
                   Email Address
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                    <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-blue-400 transition-colors" />
                   </div>
                   <input
                     id="email"
@@ -277,7 +277,7 @@ const RegisterPage = () => {
                     type="email"
                     autoComplete="email"
                     required
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
+                    className="block w-full pl-10 pr-3 py-3 bg-slate-700 border border-slate-600 rounded-lg placeholder-gray-500 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-slate-500"
                     placeholder="Enter your email"
                     value={formData.email}
                     onChange={handleChange}
@@ -287,15 +287,15 @@ const RegisterPage = () => {
               
               {/* Vendor Fields */}
               {formData.role === 'vendor' && (
-                <div className="space-y-4 p-5 bg-blue-50 rounded-xl border border-blue-200 animate-fade-in-up">
-                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                    <Package className="h-5 w-5 mr-2 text-blue-600" />
+                <div className="space-y-4 p-5 bg-slate-700/50 rounded-xl border border-slate-600/50 animate-fade-in-up">
+                  <h3 className="text-lg font-semibold text-gray-100 flex items-center">
+                    <Package className="h-5 w-5 mr-2 text-blue-400" />
                     Business Information
                   </h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="businessName" className="block text-sm font-medium text-gray-300 mb-2">
                         Business Name <span className="text-red-500">*</span>
                       </label>
                       <input

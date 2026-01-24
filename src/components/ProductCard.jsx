@@ -55,18 +55,18 @@ const ProductCard = ({ product }) => {
   return (
     <div 
       onClick={handleViewProduct}
-      className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 group cursor-pointer transform hover:-translate-y-1"
+      className="bg-slate-800 rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-700/50 group cursor-pointer transform hover:-translate-y-1 card-hover"
     >
       <div className="relative overflow-hidden">
-        <div className={`absolute top-2 sm:top-3 left-2 sm:left-3 ${product.badgeColor || product.tagColor || 'bg-pink-500'} text-white px-2 sm:px-3 py-1 rounded-full text-xs font-semibold z-10 animate-pulse`}>
+        <div className={`absolute top-2 sm:top-3 left-2 sm:left-3 ${product.badgeColor || product.tagColor || 'bg-gradient-to-r from-blue-600 to-purple-600'} text-white px-2 sm:px-3 py-1 rounded-full text-xs font-semibold z-10 animate-pulse`}>
           {product.badge || product.tag}
         </div>
         
         <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
           <button 
             onClick={handleAddToWishlist}
-            className={`p-2 rounded-full bg-white/90 backdrop-blur-sm border border-gray-200 shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-110 ${
-              isInWishlist(product.id) ? 'text-red-500' : 'text-gray-600 hover:text-red-500'
+            className={`p-2 rounded-full bg-slate-700/90 backdrop-blur-sm border border-slate-600/50 shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-110 ${
+              isInWishlist(product.id) ? 'text-pink-500' : 'text-gray-400 hover:text-pink-500'
             }`}
             title={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
           >
@@ -74,7 +74,7 @@ const ProductCard = ({ product }) => {
           </button>
           <button 
             onClick={handleViewProduct}
-            className="p-2 rounded-full bg-white/90 backdrop-blur-sm border border-gray-200 shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-110 text-gray-600 hover:text-blue-500"
+            className="p-2 rounded-full bg-slate-700/90 backdrop-blur-sm border border-slate-600/50 shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-110 text-gray-400 hover:text-blue-400"
             title="Quick view"
           >
             <Eye size={18} />
@@ -88,10 +88,10 @@ const ProductCard = ({ product }) => {
         />
         
         {/* Quick add to cart overlay */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4">
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-slate-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4">
           <button 
             onClick={handleAddToCart}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors flex items-center justify-center gap-2 transform translate-y-2 group-hover:translate-y-0"
+            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-2 rounded-lg transition-colors flex items-center justify-center gap-2 transform translate-y-2 group-hover:translate-y-0"
           >
             <ShoppingCart size={16} />
             <span className="text-sm">Quick Add</span>
@@ -101,7 +101,7 @@ const ProductCard = ({ product }) => {
       
       <div className="p-3 sm:p-4">
         <p className="text-xs text-gray-500 mb-1 truncate">{product.category || product.brand}</p>
-        <h3 className="text-sm font-medium text-gray-800 mb-2 h-8 sm:h-10 line-clamp-2 group-hover:text-blue-600 transition-colors">
+        <h3 className="text-sm font-medium text-gray-100 mb-2 h-8 sm:h-10 line-clamp-2 group-hover:text-blue-400 transition-colors">
           {product.name}
         </h3>
         
@@ -112,15 +112,15 @@ const ProductCard = ({ product }) => {
           By {product.brand}
         </div>
         <div className="flex items-center gap-2 mb-3 sm:mb-4">
-          <span className="text-base sm:text-lg font-bold text-blue-600">
+          <span className="text-base sm:text-lg font-bold text-blue-400">
             {product.currency ? formatVendorPrice(product.price, product.currency) : formatPrice(product.price)}
           </span>
           {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
             <>
-              <span className="text-xs sm:text-sm text-gray-400 line-through">
+              <span className="text-xs sm:text-sm text-gray-500 line-through">
                 {product.currency ? formatVendorPrice(product.originalPrice, product.currency) : formatPrice(product.originalPrice)}
               </span>
-              <span className="text-xs text-red-500 font-semibold">
+              <span className="text-xs text-pink-500 font-semibold">
                 {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
               </span>
             </>
@@ -128,7 +128,7 @@ const ProductCard = ({ product }) => {
         </div>
         <button 
           onClick={handleAddToCart}
-          className="w-full bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium py-2 sm:py-2.5 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 hover:shadow-md"
+          className="w-full bg-slate-700/50 hover:bg-slate-600/50 text-blue-400 font-medium py-2 sm:py-2.5 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 hover:shadow-md border border-slate-600/50"
         >
           <ShoppingCart size={16} />
           <span className="text-sm">ADD TO CART</span>

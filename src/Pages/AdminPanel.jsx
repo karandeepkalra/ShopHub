@@ -221,33 +221,49 @@ const AdminPanel = () => {
   };
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return <div className="min-h-screen flex items-center justify-center bg-slate-900 text-gray-100">Loading...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-slate-900 py-8">
       <div className="max-w-7xl mx-auto px-4">
 
         {/* HEADER */}
-        <div className="bg-white p-6 rounded-xl mb-6">
+        <div className="bg-slate-800 p-6 rounded-xl mb-6 border border-slate-700/50">
           <div>
-            <h1 className="text-3xl font-bold">Admin Panel</h1>
-            <p className="text-gray-600">Manage products & vendors</p>
+            <h1 className="text-3xl font-bold text-gray-100">Admin Panel</h1>
+            <p className="text-gray-400">Manage products & vendors</p>
           </div>
         </div>
 
         {/* TABS */}
-        <div className="bg-white p-4 rounded-xl mb-6 flex gap-8">
-          <button onClick={() => setActiveTab('products')}>Products</button>
-          <button onClick={() => setActiveTab('vendors')}>
+        <div className="bg-slate-800 p-4 rounded-xl mb-6 flex gap-8 border border-slate-700/50">
+          <button 
+            onClick={() => setActiveTab('products')}
+            className={`px-4 py-2 rounded-lg transition-all ${
+              activeTab === 'products' 
+                ? 'bg-blue-600 text-white' 
+                : 'text-gray-300 hover:bg-slate-700'
+            }`}
+          >
+            Products
+          </button>
+          <button 
+            onClick={() => setActiveTab('vendors')}
+            className={`px-4 py-2 rounded-lg transition-all ${
+              activeTab === 'vendors' 
+                ? 'bg-blue-600 text-white' 
+                : 'text-gray-300 hover:bg-slate-700'
+            }`}
+          >
             Vendors ({pendingVendors.length})
           </button>
         </div>
 
         {/* PRODUCTS TAB */}
         {activeTab === 'products' && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Products ({products.length})</h2>
+          <div className="bg-slate-800 rounded-xl shadow-lg border border-slate-700/50 p-6">
+            <h2 className="text-xl font-semibold text-gray-100 mb-4">Products ({products.length})</h2>
             
             {products.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
@@ -257,18 +273,18 @@ const AdminPanel = () => {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">Image</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">Name</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">Category</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">Price</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">Stock</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
+                    <tr className="border-b border-slate-700">
+                      <th className="text-left py-3 px-4 font-medium text-gray-300">Image</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-300">Name</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-300">Category</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-300">Price</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-300">Stock</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-300">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {products.map((product) => (
-                      <tr key={product.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <tr key={product.id} className="border-b border-slate-700 hover:bg-slate-700/50">
                         <td className="py-3 px-4">
                           <img
                             src={product.image || '/placeholder-image.jpg'}
@@ -276,14 +292,14 @@ const AdminPanel = () => {
                             className="w-12 h-12 object-cover rounded-lg"
                           />
                         </td>
-                        <td className="py-3 px-4 font-medium text-gray-900">{product.name}</td>
-                        <td className="py-3 px-4 text-gray-600">{product.category}</td>
-                        <td className="py-3 px-4 text-gray-900">${product.price}</td>
+                        <td className="py-3 px-4 font-medium text-gray-100">{product.name}</td>
+                        <td className="py-3 px-4 text-gray-400">{product.category}</td>
+                        <td className="py-3 px-4 text-gray-100">${product.price}</td>
                         <td className="py-3 px-4">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            product.stock > 10 ? 'bg-green-100 text-green-800' : 
-                            product.stock > 0 ? 'bg-yellow-100 text-yellow-800' : 
-                            'bg-red-100 text-red-800'
+                            product.stock > 10 ? 'bg-green-900/50 text-green-400' : 
+                            product.stock > 0 ? 'bg-yellow-900/50 text-yellow-400' : 
+                            'bg-red-900/50 text-red-400'
                           }`}>
                             {product.stock} in stock
                           </span>
@@ -292,13 +308,13 @@ const AdminPanel = () => {
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleEdit(product)}
-                              className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                              className="p-1 text-blue-400 hover:bg-blue-900/50 rounded"
                             >
                               <Edit2 size={16} />
                             </button>
                             <button
                               onClick={() => handleDelete(product.id)}
-                              className="p-1 text-red-600 hover:bg-red-50 rounded"
+                              className="p-1 text-red-400 hover:bg-red-900/50 rounded"
                             >
                               <Trash2 size={16} />
                             </button>

@@ -201,11 +201,11 @@ const VendorPanel = () => {
   if (!user) {
     console.log('VendorPanel - No user');
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-slate-900">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Not Logged In</h2>
-          <p className="text-gray-600 mb-6">Please log in to access the vendor dashboard.</p>
-          <a href="/login" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+          <h2 className="text-2xl font-bold text-gray-100 mb-4">Not Logged In</h2>
+          <p className="text-gray-400 mb-6">Please log in to access the vendor dashboard.</p>
+          <a href="/login" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200">
             Go to Login
           </a>
         </div>
@@ -217,11 +217,11 @@ const VendorPanel = () => {
   if (userRole !== 'vendor') {
     console.log('VendorPanel - Not a vendor, role:', userRole);
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-slate-900">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
-          <p className="text-gray-600 mb-6">You don't have vendor privileges. Current role: {userRole}</p>
-          <a href="/" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+          <h2 className="text-2xl font-bold text-gray-100 mb-4">Access Denied</h2>
+          <p className="text-gray-400 mb-6">You don't have vendor privileges. Current role: {userRole}</p>
+          <a href="/" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200">
             Go to Home
           </a>
         </div>
@@ -232,15 +232,15 @@ const VendorPanel = () => {
   console.log('VendorPanel - About to render main content');
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-slate-900 py-8">
       <div className="max-w-7xl mx-auto px-4">
         
         {/* VENDOR HEADER */}
-        <div className="bg-white p-6 rounded-xl mb-6">
+        <div className="bg-slate-800 p-6 rounded-xl mb-6 border border-slate-700/50">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Vendor Dashboard</h1>
-              <p className="text-gray-600 mt-1">
+              <h1 className="text-3xl font-bold text-gray-100">Vendor Dashboard</h1>
+              <p className="text-gray-400 mt-1">
                 Manage your products - {vendorInfo?.businessName || 'Vendor'}
               </p>
               <div className="flex items-center gap-4 mt-2">
@@ -251,10 +251,10 @@ const VendorPanel = () => {
                 </span>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   isApproved 
-                    ? 'bg-green-100 text-green-800' 
+                    ? 'bg-green-900/50 text-green-400' 
                     : isPending
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : 'bg-red-100 text-red-800'
+                    ? 'bg-yellow-900/50 text-yellow-400'
+                    : 'bg-red-900/50 text-red-400'
                 }`}>
                   {isApproved ? 'Approved' : isPending ? 'Pending' : 'Rejected'}
                 </span>
@@ -262,10 +262,10 @@ const VendorPanel = () => {
             </div>
             <button
               onClick={() => setShowAddForm(true)}
-              className={`px-4 py-2 rounded-lg flex gap-2 transition-colors ${
+              className={`px-4 py-2 rounded-lg flex gap-2 transition-all duration-200 ${
                 isApproved 
-                  ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                  : 'bg-yellow-600 text-white hover:bg-yellow-700'
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700' 
+                  : 'bg-gradient-to-r from-yellow-600 to-orange-600 text-white hover:from-yellow-700 hover:to-orange-700'
               }`}
             >
               <Plus /> Add Product
@@ -275,24 +275,24 @@ const VendorPanel = () => {
 
         {/* STATUS MESSAGE FOR PENDING/REJECTED VENDORS */}
         {!isApproved && (
-          <div className="bg-white p-6 rounded-xl mb-6">
+          <div className="bg-slate-800 p-6 rounded-xl mb-6 border border-slate-700/50">
             <div className="flex items-start gap-4">
               <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                isPending ? 'bg-yellow-100' : 'bg-red-100'
+                isPending ? 'bg-yellow-900/50' : 'bg-red-900/50'
               }`}>
                 {isPending ? (
-                  <Clock className="w-6 h-6 text-yellow-600" />
+                  <Clock className="w-6 h-6 text-yellow-400" />
                 ) : (
-                  <AlertCircle className="w-6 h-6 text-red-600" />
+                  <AlertCircle className="w-6 h-6 text-red-400" />
                 )}
               </div>
               <div className="flex-1">
                 <h2 className={`text-xl font-semibold mb-2 ${
-                  isPending ? 'text-yellow-800' : 'text-red-800'
+                  isPending ? 'text-yellow-400' : 'text-red-400'
                 }`}>
                   {isPending ? 'Application Under Review' : 'Application Rejected'}
                 </h2>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-400 mb-4">
                   {isPending 
                     ? 'Your vendor application is currently being reviewed by the admin. You will be able to add products once your application is approved.'
                     : 'Your vendor application has been rejected. Please contact the admin for more information.'
@@ -349,31 +349,31 @@ const VendorPanel = () => {
 
         {/* ADD/EDIT PRODUCT FORM - SHOW FOR ALL VENDORS */}
         {showAddForm && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+          <div className="bg-slate-800 rounded-xl shadow-lg border border-slate-700/50 p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-xl font-semibold text-gray-100">
                 {editingProduct ? 'Edit Product' : 'Add New Product'}
               </h2>
               {!isApproved && (
-                <span className="text-sm text-yellow-600 bg-yellow-50 px-2 py-1 rounded">
+                <span className="text-sm text-yellow-400 bg-yellow-900/50 px-2 py-1 rounded">
                   Products will be visible after approval
                 </span>
               )}
-              <button onClick={resetForm} className="text-gray-400 hover:text-gray-600">
+              <button onClick={resetForm} className="text-gray-400 hover:text-gray-200">
                 <X size={24} />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                <p className="text-sm text-blue-800">
-                  <strong>Pricing Information:</strong> Enter prices in your local currency ({currencySymbol} - {selectedCountry}). 
+              <div className="bg-blue-900/50 border border-blue-800/50 rounded-lg p-3 mb-4">
+                <p className="text-sm text-blue-400">
+                  <strong>Pricing Information:</strong> Enter prices in your local currency ({currencySymbol}) - {selectedCountry}). 
                   Products will be displayed to customers in their own local currency with automatic conversion.
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
                     <Package className="inline w-4 h-4 mr-1" />
                     Product Name
                   </label>
@@ -383,12 +383,12 @@ const VendorPanel = () => {
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-100"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
                     <DollarSign className="inline w-4 h-4 mr-1" />
                     Sale Price ({currencySymbol})
                   </label>
