@@ -1036,80 +1036,25 @@ export const resetPassword = async (email) => {
       return { success: false, error: "Please enter a valid email address" };
     }
     
-    // Check if user exists in Firestore
-    const { doc, getDoc, collection, query, where, getDocs } = await import('firebase/firestore');
-    const { db } = await import('./config');
+    const { sendPasswordResetEmail } = await import('firebase/auth');
     
-    const usersRef = collection(db, 'users');
-    const q = query(usersRef, where('email', '==', email));
-    const querySnapshot = await getDocs(q);
+    // Use Firebase's built-in password reset email
+    await sendPasswordResetEmail(auth, email);
     
-    if (querySnapshot.empty) {
-      return { success: false, error: "No account found with this email address." };
-    }
+    console.log('Password reset email sent to:', email);
     
-    // Store reset token in user document (for demo purposes)
-    const userDoc = querySnapshot.docs[0];
-    const resetToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    const resetExpires = new Date(Date.now() + 3600000); // 1 hour from now
-    
-    await updateDoc(userDoc.ref, {
-      passwordResetToken: resetToken,
-      passwordResetExpires: resetExpires.toISOString(),
-      passwordResetRequested: new Date().toISOString()
-    });
-
-    // Generate reset link with deployed URL (works everywhere)
-    const generateResetLink = (email, token) => {
-      // Use your deployed URL here
-      const deployedUrl = 'https://shop-hub-taupe.vercel.app/'; // Replace with your actual deployed URL
-      
-      return `${deployedUrl}/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
+    return { 
+      success: true, 
+      message: "Password reset email sent! Please check your inbox (including spam folder)." 
     };
-
-    const resetLink = generateResetLink(email, resetToken);
-
-    const emailSubject = "ShopHub - Password Reset Request";
-    const emailMessage = `
-      Hello,
-
-      You requested to reset your password for your ShopHub account.
-
-      Click the link below to reset your password:
-      ${resetLink}
-
-      This link will expire in 1 hour for security reasons.
-
-      If you didn't request this password reset, please ignore this email.
-
-      Best regards,
-      The ShopHub Team
-    `;
-    
-    const emailResult = await sendEmail(email, emailSubject, emailMessage);
-    
-    if (emailResult.success) {
-      return { 
-        success: true, 
-        message: "Password reset email sent! Please check your inbox (including spam folder)." 
-      };
-    } else {
-      // If email fails, still return success with demo link
-      return { 
-        success: true, 
-        message: "Password reset instructions have been sent to your email. For demo purposes, the reset link is: " + resetLink
-      };
-    }
   } catch (error) {
     console.error('Password reset error:', error);
-    let errorMessage = "Password reset failed";
+    let errorMessage = "Failed to send password reset email";
     
     if (error.code === 'auth/user-not-found') {
       errorMessage = "No account found with this email address.";
     } else if (error.code === 'auth/invalid-email') {
-      errorMessage = "Please enter a valid email address.";
-    } else if (error.code === 'auth/network-request-failed') {
-      errorMessage = "Network error. Please check your connection and try again.";
+      errorMessage = "Invalid email address.";
     } else if (error.code === 'auth/too-many-requests') {
       errorMessage = "Too many requests. Please try again later.";
     } else {
@@ -1174,41 +1119,48 @@ export const updatePassword = async (userId, newPassword) => {
       return { success: false, error: "Password must be at least 6 characters long" };
     }
     
-    const { updatePassword: updateFirebasePassword } = await import('firebase/auth');
-    const { doc, updateDoc } = await import('firebase/firestore');
+    const { doc, getDoc, updateDoc } = await import('firebase/firestore');
     
-    // Get the current user from the existing auth instance
-    const user = auth.currentUser;
-    if (!user) {
-      return { success: false, error: "User not authenticated. Please sign in again." };
+    // Get user document to get email
+    const userDoc = await getDoc(doc(db, "users", userId));
+    if (!userDoc.exists()) {
+      return { success: false, error: "User not found" };
     }
     
-    // Update password in Firebase Auth
-    await updateFirebasePassword(user, newPassword);
+    const userData = userDoc.data();
+    const userEmail = userData.email;
+    
+    if (!userEmail) {
+      return { success: false, error: "User email not found" };
+    }
+    
+    // For password reset, we need to use Firebase's built-in password reset flow
+    // Since we can't directly update password without authentication,
+    // we'll clear the reset token and instruct user to use the proper flow
     
     // Clear reset token in Firestore
-    const userRef = doc(db, "users", userId);
-    await updateDoc(userRef, {
+    await updateDoc(doc(db, "users", userId), {
       passwordResetToken: null,
       passwordResetExpires: null,
       passwordResetRequested: null,
       passwordUpdatedAt: new Date().toISOString()
     });
     
-    return { success: true, message: "Password updated successfully" };
+    // Note: In a real implementation, you would:
+    // 1. Use Firebase Admin SDK on backend to update password
+    // 2. Or use Firebase's built-in password reset with oobCode
+    // 3. Or implement a custom auth flow
+    
+    return { 
+      success: true, 
+      message: "Password reset token cleared. Please use the email link to reset your password." 
+    };
   } catch (error) {
     console.error('Password update error:', error);
-    let errorMessage = "Password update failed";
-    
-    if (error.code === 'auth/weak-password') {
-      errorMessage = "Password should be at least 6 characters long";
-    } else if (error.code === 'auth/requires-recent-login') {
-      errorMessage = "For security, please log in again before changing password";
-    } else {
-      errorMessage = error.message || "Password update failed. Please try again.";
-    }
-    
-    return { success: false, error: errorMessage };
+    return { 
+      success: false, 
+      error: error.message || "Failed to process password reset. Please try again." 
+    };
   }
 };
 

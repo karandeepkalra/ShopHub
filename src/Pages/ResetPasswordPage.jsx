@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { verifyResetToken, updatePassword } from '../firebase/config';
+import { confirmPasswordReset } from 'firebase/auth';
+import { auth } from '../firebase/config';
 import { Eye, EyeOff, Lock, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
 
 const ResetPasswordPage = () => {
-  const [token, setToken] = useState('');
-  const [email, setEmail] = useState('');
+  const [oobCode, setOobCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -13,52 +13,24 @@ const ResetPasswordPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [tokenValid, setTokenValid] = useState(null);
-  const [step, setStep] = useState('verifying'); // 'verifying', 'reset', 'success'
+  const [step, setStep] = useState('reset'); // 'reset', 'success', 'error'
 
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    // Extract token and email from URL parameters
+    // Extract oobCode from URL parameters (Firebase's password reset code)
     const params = new URLSearchParams(location.search);
-    const urlToken = params.get('token');
-    const urlEmail = params.get('email');
+    const urlOobCode = params.get('oobCode');
 
-    if (!urlToken || !urlEmail) {
+    if (!urlOobCode) {
       setError('Invalid password reset link. Please request a new password reset.');
       setStep('error');
       return;
     }
 
-    setToken(urlToken);
-    setEmail(urlEmail);
-
-    // Verify token
-    verifyToken(urlToken, urlEmail);
+    setOobCode(urlOobCode);
   }, [location.search]);
-
-  const verifyToken = async (token, email) => {
-    try {
-      setLoading(true);
-      const result = await verifyResetToken(email, token);
-      
-      if (result.success) {
-        setTokenValid(true);
-        setStep('reset');
-      } else {
-        setError(result.error);
-        setTokenValid(false);
-        setStep('error');
-      }
-    } catch (err) {
-      setError('Failed to verify reset link. Please try again.');
-      setTokenValid(false);
-      setStep('error');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -78,52 +50,38 @@ const ResetPasswordPage = () => {
 
     try {
       setLoading(true);
-      const result = await updatePassword(tokenValid.userId, newPassword);
       
-      if (result.success) {
-        setSuccess(result.message);
-        setStep('success');
-        
-        // Redirect to login after 3 seconds
-        setTimeout(() => {
-          navigate('/login?reset=true');
-        }, 3000);
-      } else {
-        setError(result.error);
-      }
+      // Use Firebase's confirmPasswordReset function
+      await confirmPasswordReset(auth, oobCode, newPassword);
+      
+      setSuccess('Password has been reset successfully!');
+      setStep('success');
+      
+      // Redirect to login after 3 seconds
+      setTimeout(() => {
+        navigate('/login?reset=true');
+      }, 3000);
     } catch (err) {
-      setError('Failed to update password. Please try again.');
+      console.error('Password reset error:', err);
+      let errorMessage = 'Failed to reset password. Please try again.';
+      
+      if (err.code === 'auth/expired-action-code') {
+        errorMessage = 'Password reset link has expired. Please request a new one.';
+      } else if (err.code === 'auth/invalid-action-code') {
+        errorMessage = 'Invalid password reset link. Please request a new one.';
+      } else if (err.code === 'auth/user-disabled') {
+        errorMessage = 'This account has been disabled. Please contact support.';
+      } else if (err.code === 'auth/user-not-found') {
+        errorMessage = 'User not found. Please check your email address.';
+      } else if (err.code === 'auth/weak-password') {
+        errorMessage = 'Password should be at least 6 characters long.';
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
-
-  if (step === 'verifying') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full">
-          <div className="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-8 border border-white/20">
-            <div className="text-center">
-              <div className="mx-auto h-16 w-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-xl mb-4">
-                <Lock className="h-8 w-8 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Verifying Reset Link</h2>
-              <p className="text-gray-600 mb-6">Please wait while we verify your password reset link...</p>
-              
-              {loading && (
-                <div className="flex justify-center">
-                  <svg className="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (step === 'error') {
     return (
@@ -186,7 +144,7 @@ const ResetPasswordPage = () => {
               <Lock className="h-8 w-8 text-white" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Reset Password</h2>
-            <p className="text-gray-600">Enter your new password for {email}</p>
+            <p className="text-gray-600">Enter your new password below</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
